@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "187612684410",
+    "firebase_url": "https://saloonapp-c93ca.firebaseio.com",
+    "project_id": "saloonapp-c93ca",
+    "storage_bucket": "saloonapp-c93ca.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:187612684410:android:7da318ba27318c7fc71bc3",
+        "android_client_info": {
+          "package_name": "com.helawebdesign.helawebdesign_saloon"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "187612684410-piqaukns986517ftmnfik2ci1um9rgfm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDa2CKv3r3xm8RB72scsecF4xHpSjacLy4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "187612684410-piqaukns986517ftmnfik2ci1um9rgfm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
