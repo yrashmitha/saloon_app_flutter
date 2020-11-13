@@ -1,67 +1,108 @@
-import 'dart:wasm';
+import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:helawebdesign_saloon/models/saloon.dart';
+import 'package:helawebdesign_saloon/models/service.dart';
 
 class SaloonsProvider with ChangeNotifier {
-  List<Saloon> _saloons = [
-    // Saloon(
-    //     "1",
-    //     "Saloon Dmesh Bar",
-    //     "https://firebasestorage.googleapis.com/v0/b/saloonapp-c93ca.appspot.com/o/saloon.jpg?alt=media&token=60417afe-6cbc-4933-a5b7-bd2504f687e4",
-    //     "Small description",
-    //     "Kandana",
-    //     "No 170 Batagama South Kandana",
-    //     "Male only",
-    //     null,
-    //     null),
-    // Saloon(
-    //     "2",
-    //     "Saloon Nipuni",
-    //     "https://firebasestorage.googleapis.com/v0/b/saloonapp-c93ca.appspot.com/o/image3.jpg?alt=media&token=cad3e4ef-64ee-486c-b64c-7a7e7e927d72",
-    //     "Small description for nipuni's saloon",
-    //     "Kottawa",
-    //     "No 170 Batagama South Kandana",
-    //     "Female only",
-    //     null,
-    //     null)
-  ];
+  List<Saloon> _saloons = [];
 
-  String _name = "Yohan";
+  Saloon _selectedSaloon;
 
-  String get name {
-    return _name;
-  }
+  List<Service> allServices = [];
 
   List<Saloon> get getSaloons {
     return _saloons;
   }
 
-  Future<void> getSaloonsData() async {
-    List<Saloon> sList = [];
-    await Firebase.initializeApp();
-    await FirebaseFirestore.instance.collection('saloons').get().then((QuerySnapshot querySnapshot) =>
-    {
-      querySnapshot.docs.forEach((doc) {
-        print(doc.data());
-        sList.add(Saloon(
-            doc.id,
-            doc["name"],
-            doc["main-image_url"],
-            doc["description"],
-            doc["base_location"],
-            doc["address"],
-            doc["gender"],
-            doc["additional_data"],
-            doc["services"]));
-      })
+  Saloon get selectedSaloon => _selectedSaloon;
+
+  void setSelectedSaloon(Saloon value) {
+    print("saloon setted");
+    _selectedSaloon = value;
+  }
+
+  List<Service> get getAllService => allServices;
+
+  void setAllService(List<dynamic> value) {
+    print("saloon setted");
+    allServices = value;
+  }
+
+  List<Service> returnMyServicesArray(List arr) {
+    List<Service> sList = [];
+    arr.forEach((element) {
+      sList.add(Service(
+          id: element['id'],
+          name: element['name'],
+          description: element['description'],
+          price: element['price']));
     });
+    return sList;
+  }
 
-    _saloons = sList;
+  Future<void> getSaloonsData(bool refresh) async {
+      print("get saloon runnig");
+      List<Saloon> sList = [];
+      await Firebase.initializeApp();
+      await FirebaseFirestore.instance
+          .collection('saloons')
+          .get()
+          .then((QuerySnapshot querySnapshot) => {
+            print("getting saloon finished"),
+        querySnapshot.docs.forEach((doc) {
 
-    notifyListeners();
+          sList.add(
+            Saloon(
+                doc.id,
+                doc["name"] ,
+                doc["main-image_url"] ,
+                doc["description"] ,
+                doc["base_location"],
+                doc["address"],
+                doc["gender"],
+                doc["additional_data"],
+                doc.data()['appointment_interval'],
+                returnMyServicesArray(doc["services"])),
+          );
+        })
+      });
+
+      _saloons = sList;
+
+      notifyListeners();
+
+
+
+  }
+
+  Future<void> getAllServicesFromThisSaloon(String saloonId) async {
+    List<Service> sList = [];
+    await Firebase.initializeApp();
+    try{
+      await FirebaseFirestore.instance
+          .collection('saloons/$saloonId/all_services')
+          .get()
+          .then((QuerySnapshot querySnapshot) => {
+        querySnapshot.docs.forEach((doc) {
+          sList.add(Service(
+              id: doc.id,
+              name: doc['name'],
+              description: doc['description'],
+              price: doc['price']));
+        })
+      }).catchError((onError){
+        print(onError);
+      });
+      allServices = sList;
+      notifyListeners();
+    } on PlatformException
+    catch( e){
+      print(e.code);
+    }
 
   }
 }

@@ -5,14 +5,13 @@ import '../read_more.dart';
 
 class SaloonSecondaryData extends StatelessWidget {
 
-  final Map<dynamic,dynamic> additionalData;
+  final Map<String,dynamic> additionalData;
   final String description;
 
   SaloonSecondaryData({this.additionalData,this.description});
 
   @override
   Widget build(BuildContext context) {
-    print(additionalData['open_hours']);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -20,7 +19,7 @@ class SaloonSecondaryData extends StatelessWidget {
           backgroundColor: Colors.grey.withOpacity(0.1),
           title: Text("Opening hours"),
           subtitle: Text(
-            "Closed Now",
+            DateTime.now().weekday == additionalData['open_hours']['${DateTime.now().weekday}'] ? "Open Today" : "Closed Now!",
             style: TextStyle(color: Colors.grey),
           ),
           tilePadding: EdgeInsets.only(left: 0),
@@ -33,117 +32,30 @@ class SaloonSecondaryData extends StatelessWidget {
               children: [
                 Container(
                   child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            "Mon",
-                            style: TextStyle(fontSize: 16),
-                          ),
-                          Text(
-                            "9:00 AM - 6:00 PM",
-                            style: TextStyle(fontSize: 16),
-                          ),
-                        ],
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      // Row(
-                      //   children: [
-                      //     Text(
-                      //       "Mon",
-                      //       style: TextStyle(fontSize: 16),
-                      //     ),
-                      //     Text(
-                      //       "9:00 AM - 6:00 PM",
-                      //       style: TextStyle(fontSize: 16),
-                      //     ),
-                      //   ],
-                      //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      // ),
-                      // SizedBox(
-                      //   height: 10,
-                      // ),
-                      // Row(
-                      //   children: [
-                      //     Text(
-                      //       "Mon",
-                      //       style: TextStyle(fontSize: 16),
-                      //     ),
-                      //     Text(
-                      //       "9:00 AM - 6:00 PM",
-                      //       style: TextStyle(fontSize: 16),
-                      //     ),
-                      //   ],
-                      //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      // ),
-                      // SizedBox(
-                      //   height: 10,
-                      // ),
-                      // Row(
-                      //   children: [
-                      //     Text(
-                      //       "Mon",
-                      //       style: TextStyle(fontSize: 16),
-                      //     ),
-                      //     Text(
-                      //       "9:00 AM - 6:00 PM",
-                      //       style: TextStyle(fontSize: 16),
-                      //     ),
-                      //   ],
-                      //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      // ),
-                      // SizedBox(
-                      //   height: 10,
-                      // ),
-                      // Row(
-                      //   children: [
-                      //     Text(
-                      //       "Mon",
-                      //       style: TextStyle(fontSize: 16),
-                      //     ),
-                      //     Text(
-                      //       "9:00 AM - 6:00 PM",
-                      //       style: TextStyle(fontSize: 16),
-                      //     ),
-                      //   ],
-                      //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      // ),
-                      // SizedBox(
-                      //   height: 10,
-                      // ),
-                      // Row(
-                      //   children: [
-                      //     Text(
-                      //       "Mon",
-                      //       style: TextStyle(fontSize: 16),
-                      //     ),
-                      //     Text(
-                      //       "9:00 AM - 6:00 PM",
-                      //       style: TextStyle(fontSize: 16),
-                      //     ),
-                      //   ],
-                      //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      // ),
-                      // SizedBox(
-                      //   height: 10,
-                      // ),
-                      // Row(
-                      //   children: [
-                      //     Text(
-                      //       "Mon",
-                      //       style: TextStyle(fontSize: 16),
-                      //     ),
-                      //     Text(
-                      //       "9:00 AM - 6:00 PM",
-                      //       style: TextStyle(fontSize: 16),
-                      //     ),
-                      //   ],
-                      //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      // ),
-                    ],
+                    children: additionalData['open_hours'].keys.map<Widget>((String key){
+                      return Container(
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  key,
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                                Text(
+                                  additionalData['open_hours'][key],
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                              ],
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList()
                   ),
                 ),
               ],

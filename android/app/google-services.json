@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "187612684410-87q08l40hsv5md2ugn7ern0dk9mjcl67.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.helawebdesign.helawebdesign_saloon",
+            "certificate_hash": "cac36682616c9e802b153d16c5cd9d1407fedef0"
+          }
+        },
+        {
           "client_id": "187612684410-piqaukns986517ftmnfik2ci1um9rgfm.apps.googleusercontent.com",
           "client_type": 3
         }

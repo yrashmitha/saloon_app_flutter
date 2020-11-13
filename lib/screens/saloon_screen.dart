@@ -15,11 +15,12 @@ import 'package:helawebdesign_saloon/widgets/saloon_screen/saloon_services.dart'
 import 'package:route_transitions/route_transitions.dart';
 
 class SaloonScreen extends StatefulWidget {
+  static String id = 'saloon-screen';
   final String saloonName;
-  final String id;
+
   final Saloon saloon;
 
-  SaloonScreen({this.saloonName, this.id,this.saloon});
+  SaloonScreen({this.saloonName, this.saloon});
 
   @override
   _SaloonScreenState createState() => _SaloonScreenState();
@@ -27,11 +28,21 @@ class SaloonScreen extends StatefulWidget {
 
 class _SaloonScreenState extends State<SaloonScreen>
     with SingleTickerProviderStateMixin {
+
   List<Service> _selectedServices = [];
 
-  void selectedServicesFunc(List<Service> list) {
-    _selectedServices = list;
-    print("I am from parent widget  $_selectedServices");
+  void selectedServicesFunc(Service s) {
+     bool x = _selectedServices.contains(s);
+     if(x){
+       _selectedServices.remove(s);
+     }
+     else{
+       _selectedServices.add(s);
+     }
+
+     _selectedServices.forEach((element) {
+     });
+
   }
 
   int currentIndex = 0;
@@ -58,6 +69,7 @@ class _SaloonScreenState extends State<SaloonScreen>
 
   @override
   void initState() {
+    print("saloon screen init");
     _scrollController = ScrollController();
     _scrollController.addListener(_scrollListener);
     super.initState();
@@ -113,7 +125,7 @@ class _SaloonScreenState extends State<SaloonScreen>
               flexibleSpace: FlexibleSpaceBar(
                 centerTitle: true,
                 background: Hero(
-                  tag: widget.id,
+                  tag: widget.saloon.id,
                   child: CachedNetworkImage(
                     fit: BoxFit.cover,
                     placeholder: (ctx, url) {
@@ -140,7 +152,7 @@ class _SaloonScreenState extends State<SaloonScreen>
                     SizedBox(
                       height: 20,
                     ),
-                    SaloonServices(selectionChange: selectedServicesFunc),
+                    SaloonServices(selectionChange: selectedServicesFunc,),
                     SizedBox(
                       height: 20,
                     ),
@@ -171,7 +183,7 @@ class _SaloonScreenState extends State<SaloonScreen>
                     context,
                     PageRouteTransition(
                       animationType: AnimationType.slide_right,
-                      builder: (context) => SaloonServicesScreen(selectedServices: _selectedServices,),
+                      builder: (context) => SaloonServicesScreen(selectedServices: _selectedServices),
                     ),
                   );
                 },

@@ -3,13 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:helawebdesign_saloon/models/constants.dart';
 import 'package:helawebdesign_saloon/models/service.dart';
+import 'package:helawebdesign_saloon/providers/appointment_provider.dart';
+import 'package:helawebdesign_saloon/providers/saloons_provider.dart';
 import 'package:helawebdesign_saloon/screens/appointment_book.dart';
+import 'package:provider/provider.dart';
 import 'package:route_transitions/route_transitions.dart';
 
 class SaloonServicesScreen extends StatefulWidget {
-  List<Service> selectedServices;
 
-  SaloonServicesScreen({@required this.selectedServices});
+  static String id = 'saloon-service-screen';
+  final List<Service> selectedServices;
+
+  SaloonServicesScreen({this.selectedServices});
 
   @override
   _SaloonServicesScreenState createState() => _SaloonServicesScreenState();
@@ -19,12 +24,14 @@ class _SaloonServicesScreenState extends State<SaloonServicesScreen> {
 
   double finalPrice=0;
 
-  List<Service> selectedServices=[];
+  var loading = false;
+
+  List<Service> selectedServices;
+
 
   void filterServices(
       List<Service> selectedServices, Map<Service, bool> allServices) {
     selectedServices.forEach((element) {
-      print("my id is ${(element.id)} and name is ${element.name}");
       allServices.forEach((key, value) {
         if (element.id == key.id) {
           finalPrice=finalPrice+key.price;
@@ -34,98 +41,7 @@ class _SaloonServicesScreenState extends State<SaloonServicesScreen> {
     });
   }
 
-  Map<Service, bool> _serviceList = {
-    Service(
-      id: 1,
-      name: 'Personal Hair Cut',
-      description: 'This is small description about my service',
-      price: 300,
-    ): false,
-    Service(
-      id: 2,
-      name: 'Hair Coloring',
-      description: 'This is small description about my service',
-      price: 800,
-    ): false,
-    Service(
-      id: 3,
-      name: 'Happy Ending Massage',
-      description: 'This is small description about my service',
-      price: 3000,
-    ): false,
-    Service(
-      id: 1,
-      name: 'Personal Hair Cut',
-      description: 'This is small description about my service',
-      price: 300,
-    ): false,
-    Service(
-      id: 2,
-      name: 'Hair Coloring',
-      description: 'This is small description about my service',
-      price: 800,
-    ): false,
-    Service(
-      id: 3,
-      name: 'Happy Ending Massage',
-      description: 'This is small description about my service',
-      price: 3000,
-    ): false,
-    Service(
-      id: 1,
-      name: 'Personal Hair Cut',
-      description: 'This is small description about my service',
-      price: 300,
-    ): false,
-    Service(
-      id: 2,
-      name: 'Hair Coloring',
-      description: 'This is small description about my service',
-      price: 800,
-    ): false,
-    Service(
-      id: 3,
-      name: 'Happy Ending Massage',
-      description: 'This is small description about my service',
-      price: 3000,
-    ): false,
-    Service(
-      id: 1,
-      name: 'Personal Hair Cut',
-      description: 'This is small description about my service',
-      price: 300,
-    ): false,
-    Service(
-      id: 2,
-      name: 'Hair Coloring',
-      description: 'This is small description about my service',
-      price: 800,
-    ): false,
-    Service(
-      id: 3,
-      name: 'Happy Ending Massage',
-      description: 'This is small description about my service',
-      price: 3000,
-    ): false,
-    Service(
-      id: 1,
-      name: 'Personal Hair Cut',
-      description: 'This is small description about my service',
-      price: 300,
-    ): false,
-    Service(
-      id: 2,
-      name: 'Hair Coloring',
-      description: 'This is small description about my service',
-      price: 800,
-    ): false,
-    Service(
-      id: 3,
-      name: 'Happy Ending Massage',
-      description: 'This is small description about my service',
-      price: 3000,
-    ): false,
-  };
+  Map<Service, bool> _serviceList = {};
 
   List<Service> getSelectedServices(){
     _serviceList.forEach((key, value) {
@@ -136,20 +52,43 @@ class _SaloonServicesScreenState extends State<SaloonServicesScreen> {
     return selectedServices;
   }
 
+  Map<Service,bool> createServiceList(List<Service> list){
+    Map<Service,bool> map={};
+    list.forEach((element) {
+      map.addAll({element:false});
+    });
+    return map;
+  }
+
+
 
   @override
   void initState() {
+    loading = true;
+    selectedServices = Provider.of<AppointmentProvider>(context,listen: false).getUserSelectedService;
     super.initState();
-    filterServices(widget.selectedServices, _serviceList);
+    Future.delayed(Duration.zero).then((_) {
+      final saloonProvider = Provider.of<SaloonsProvider>(context,listen: false);
+      final saloonId = saloonProvider.selectedSaloon.id;
+     saloonProvider.getAllServicesFromThisSaloon(saloonId).then((value) {
+       setState(() {
+         _serviceList = createServiceList(saloonProvider.getAllService);
+         filterServices(widget.selectedServices, _serviceList);
+         loading=false;
+       });
+     });
+    });
+
   }
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         title: Text("Select Services"),
       ),
-      body: Padding(
+      body: loading ? Center(child: CircularProgressIndicator()) : Padding(
         padding: const EdgeInsets.all(12.0),
         child: Container(
           child: SingleChildScrollView(
@@ -166,17 +105,16 @@ class _SaloonServicesScreenState extends State<SaloonServicesScreen> {
                     title: new Text(key.name),
                     value: _serviceList[key],
                     onChanged: (bool value) {
-                      print(value);
                       setState(() {
                         _serviceList[key] = value;
-                        finalPrice= finalPrice + key.price;
+                        finalPrice= finalPrice + (value==true ? key.price : (-key.price));
                       });
                     },
                   ),
                   Align(
                       alignment: Alignment.centerRight,
                       child: Text(
-                        "Rs. ${key.price.toString()}",
+                        "Rs. ${key.price.toStringAsFixed(2)}",
                         style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
@@ -220,7 +158,7 @@ class _SaloonServicesScreenState extends State<SaloonServicesScreen> {
                     context,
                     PageRouteTransition(
                       animationType: AnimationType.slide_right,
-                      builder: (context) => AppointmentBookingScreen(getSelectedServices(),finalPrice),
+                      builder: (context) => AppointmentBookingScreen(serviceList: getSelectedServices(), price :finalPrice),
                     ),
                   );
                 },

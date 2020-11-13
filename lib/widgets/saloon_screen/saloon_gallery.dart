@@ -39,7 +39,6 @@ class _MyHomePageState extends State<MyHomePage> {
         height: 200,
         child: new Swiper(
           itemBuilder: (BuildContext context, int index) {
-            print(index);
             print("items arr ${_image[index]}");
             return ClipRRect(
               borderRadius: BorderRadius.circular(10),

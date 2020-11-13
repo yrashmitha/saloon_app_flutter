@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:helawebdesign_saloon/models/constants.dart';
 import 'package:helawebdesign_saloon/models/service.dart';
+import 'package:helawebdesign_saloon/providers/appointment_provider.dart';
+import 'package:helawebdesign_saloon/providers/saloons_provider.dart';
 import 'package:helawebdesign_saloon/screens/saloon_services_screen.dart';
+import 'package:provider/provider.dart';
 import 'package:route_transitions/route_transitions.dart';
 
 class SaloonServices extends StatefulWidget {
@@ -17,35 +20,50 @@ class SaloonServices extends StatefulWidget {
 }
 
 class _SaloonServicesState extends State<SaloonServices> {
-  Map<Service, bool> _serviceList = {
-    Service(
-      id: 1,
-      name: 'Personal Hair Cut',
-      description: 'This is small description about my service',
-      price: 300,
-    ): false,
-    Service(
-      id: 2,
-      name: 'Hair Coloring',
-      description: 'This is small description about my service',
-      price: 800,
-    ): false,
-    Service(
-      id: 3,
-      name: 'Happy Ending Massage',
-      description: 'This is small description about my service',
-      price: 3000,
-    ): false,
-  };
 
-  List<Service> selectedServices = [];
+  AppointmentProvider appointmentProvider;
+
+
+  Map<Service,bool> createServiceList(List<Service> list){
+    Map<Service,bool> map={};
+    list.forEach((element) {
+      map.addAll({element:false});
+    });
+    return map;
+  }
+
+
+  List<Service> selectedServices;
+
+  void selectedServicesFunc(Service s) {
+    bool x = selectedServices.contains(s);
+    if(x){
+      selectedServices.remove(s);
+    }
+    else{
+      selectedServices.add(s);
+    }
+
+  }
+
+
 
   List<Service> get userSelectedServices {
     return [...selectedServices];
   }
+  Map<Service,bool> _serviceList={};
+  @override
+  void initState() {
+    selectedServices = Provider.of<AppointmentProvider>(context,listen: false).getUserSelectedService;
+    Future.delayed(Duration.zero).then((_) {
+      _serviceList = createServiceList(Provider.of<SaloonsProvider>(context,listen: false).selectedSaloon.services);
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
+
     return Container(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -70,20 +88,10 @@ class _SaloonServicesState extends State<SaloonServices> {
                   title: new Text(key.name),
                   value: _serviceList[key],
                   onChanged: (bool value) {
-                    print(value);
-
-                    if (value == false && selectedServices.contains(key)) {
-                      print("have ready to remove");
-                      selectedServices.remove(key);
-                      widget.selectionChange(selectedServices);
-                    } else if (value == true &&
-                        !selectedServices.contains(key)) {
-                      print("no ready to add");
-                      selectedServices.add(key);
-                      widget.selectionChange(selectedServices);
-                    }
-
+                    widget.selectionChange(key);
+                    selectedServicesFunc(key);
                     setState(() {
+                      _serviceList.update(key, (value) => value);
                       _serviceList[key] = value;
                     });
                   },
@@ -107,7 +115,7 @@ class _SaloonServicesState extends State<SaloonServices> {
                 Navigator.of(context).push(
                   PageRouteTransition(
                       animationType: AnimationType.slide_right,
-                      builder: (context) => SaloonServicesScreen(selectedServices:userSelectedServices,),
+                      builder: (context) => SaloonServicesScreen(selectedServices:userSelectedServices),
                   ),
                 );
               },
