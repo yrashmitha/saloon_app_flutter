@@ -1,11 +1,12 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:helawebdesign_saloon/models/constants.dart';
 
 class GalleryImage extends StatelessWidget {
-  final index;
+  final String url;
 
-  GalleryImage({this.index});
+  GalleryImage({this.url});
 
   @override
   Widget build(BuildContext context) {
@@ -15,27 +16,27 @@ class GalleryImage extends StatelessWidget {
           height: MediaQuery.of(context).size.height,
           child: Stack(
             children: [
-              Hero(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: Image.asset(
-                    imageList[index],
-                    fit: BoxFit.cover,
-                  ),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: CachedNetworkImage(
+                  fit: BoxFit.cover,
+                  placeholder: (ctx, url) {
+                    return Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(kMainYellowColor),
+                      ),
+                    );
+                  },
+                  imageUrl: url,
                 ),
-                tag: imageList[index],
               ),
-              Align(
-                alignment: Alignment.topRight,
-                child: IconButton(icon: Icon(Icons.cancel), onPressed: (){
-                  Navigator.pop(context);
-                }),
-              )
+
             ],
-            fit: StackFit.expand,
+
           ),
         ),
       ),
+      appBar: AppBar(),
     );
   }
 }

@@ -12,6 +12,8 @@ import 'package:helawebdesign_saloon/screens/home_screen.dart';
 import 'package:helawebdesign_saloon/screens/login_screen.dart';
 import 'package:helawebdesign_saloon/screens/my_account_screen.dart';
 import 'package:helawebdesign_saloon/screens/my_appointments_screen.dart';
+import 'package:helawebdesign_saloon/screens/saloon_all_reviews_screen.dart';
+import 'package:helawebdesign_saloon/screens/saloon_gallery_screen.dart';
 import 'package:helawebdesign_saloon/screens/saloon_screen.dart';
 import 'package:helawebdesign_saloon/screens/saloon_services_screen.dart';
 import 'package:provider/provider.dart';
@@ -61,6 +63,8 @@ class MyApp extends StatelessWidget {
               SaloonServicesScreen.id: (ctx) => SaloonServicesScreen(),
               MyAppointmentsScreen.id: (ctx) => MyAppointmentsScreen(),
               AppointmentBookingScreen.id: (ctx) => AppointmentBookingScreen(),
+              SaloonGalleryScreen.id : (ctx) => SaloonGalleryScreen(),
+              SaloonReviewsScreen.id : (ctx) => SaloonReviewsScreen()
             },
           );
         },

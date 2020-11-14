@@ -1,4 +1,3 @@
-import 'package:helawebdesign_saloon/models/service.dart';
 
 class Saloon{
   String id;
@@ -11,8 +10,11 @@ class Saloon{
   int appointmentInterval;
   Map additionalData;
   List<dynamic> services;
+  List<dynamic> smallGallery;
+  List<dynamic> reviews;
 
 
   Saloon(this.id, this.name, this.featuredImageUrl, this.description,
-      this.baseLocation, this.address, this.gender, this.additionalData,this.appointmentInterval, this.services);
+      this.baseLocation, this.address, this.gender, this.additionalData,
+      this.appointmentInterval, this.services,this.smallGallery,this.reviews);
 }

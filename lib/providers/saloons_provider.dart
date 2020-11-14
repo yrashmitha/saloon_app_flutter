@@ -45,64 +45,103 @@ class SaloonsProvider with ChangeNotifier {
   }
 
   Future<void> getSaloonsData(bool refresh) async {
-      print("get saloon runnig");
-      List<Saloon> sList = [];
-      await Firebase.initializeApp();
-      await FirebaseFirestore.instance
-          .collection('saloons')
-          .get()
-          .then((QuerySnapshot querySnapshot) => {
-            print("getting saloon finished"),
-        querySnapshot.docs.forEach((doc) {
+    print("get saloon runnig");
+    List<Saloon> sList = [];
+    await Firebase.initializeApp();
+    await FirebaseFirestore.instance
+        .collection('saloons')
+        .get()
+        .then((QuerySnapshot querySnapshot) => {
+              print("getting saloon finished"),
+              querySnapshot.docs.forEach((doc) {
+                sList.add(
+                  Saloon(
+                      doc.id,
+                      doc.data()["name"],
+                      doc.data()["main-image_url"],
+                      doc.data()["description"],
+                      doc.data()["base_location"],
+                      doc.data()["address"],
+                      doc.data()["gender"],
+                      doc.data()["additional_data"],
+                      doc.data()['appointment_interval'],
+                      returnMyServicesArray(doc.data()["services"]),
+                      doc.data()['gallery'] == null
+                          ? []
+                          : doc.data()['gallery'],
+                      doc.data()['reviews'] == null
+                          ? []
+                          : doc.data()['reviews']),
+                );
+              })
+            });
 
-          sList.add(
-            Saloon(
-                doc.id,
-                doc["name"] ,
-                doc["main-image_url"] ,
-                doc["description"] ,
-                doc["base_location"],
-                doc["address"],
-                doc["gender"],
-                doc["additional_data"],
-                doc.data()['appointment_interval'],
-                returnMyServicesArray(doc["services"])),
-          );
-        })
-      });
+    _saloons = sList;
 
-      _saloons = sList;
-
-      notifyListeners();
-
-
-
+    notifyListeners();
   }
 
   Future<void> getAllServicesFromThisSaloon(String saloonId) async {
     List<Service> sList = [];
     await Firebase.initializeApp();
-    try{
+    try {
       await FirebaseFirestore.instance
           .collection('saloons/$saloonId/all_services')
           .get()
           .then((QuerySnapshot querySnapshot) => {
-        querySnapshot.docs.forEach((doc) {
-          sList.add(Service(
-              id: doc.id,
-              name: doc['name'],
-              description: doc['description'],
-              price: doc['price']));
-        })
-      }).catchError((onError){
+                querySnapshot.docs.forEach((doc) {
+                  sList.add(Service(
+                      id: doc.id,
+                      name: doc['name'],
+                      description: doc['description'],
+                      price: doc['price']));
+                })
+              })
+          .catchError((onError) {
         print(onError);
       });
       allServices = sList;
       notifyListeners();
-    } on PlatformException
-    catch( e){
+    } on PlatformException catch (e) {
       print(e.code);
     }
+  }
 
+  Future getAllSaloonGallery() async {
+    List<String> list = [];
+    try {
+      return await FirebaseFirestore.instance
+          .collection('saloons/${selectedSaloon.id}/all_images')
+          .get()
+          .then((value) {
+        value.docs.forEach((e) {
+          list.add(e['url']);
+        });
+        return list;
+      }).catchError((err) {
+        throw err;
+      });
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  Future getAllReviews() async {
+    List<dynamic> list = [];
+    try {
+      return await FirebaseFirestore.instance
+          .collection('saloons/${selectedSaloon.id}/all_reviews')
+          .get()
+          .then((value) {
+        value.docs.forEach((e) {
+          list.add(e);
+        });
+        return list;
+      }).catchError((err) {
+        throw err;
+      });
+    } catch (err) {
+      throw err;
+    }
   }
 }

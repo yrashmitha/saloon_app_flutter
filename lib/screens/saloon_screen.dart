@@ -1,6 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:helawebdesign_saloon/models/constants.dart';
@@ -8,8 +10,11 @@ import 'package:helawebdesign_saloon/models/saloon.dart';
 import 'package:helawebdesign_saloon/models/service.dart';
 
 import 'package:helawebdesign_saloon/screens/saloon_services_screen.dart';
+import 'package:helawebdesign_saloon/widgets/read_more.dart';
 import 'package:helawebdesign_saloon/widgets/saloon_screen/saloon_image_slider.dart';
 import 'package:helawebdesign_saloon/widgets/saloon_screen/saloon_primary_data.dart';
+import 'package:helawebdesign_saloon/widgets/saloon_screen/saloon_review_box.dart';
+import 'package:helawebdesign_saloon/widgets/saloon_screen/saloon_reviews.dart';
 import 'package:helawebdesign_saloon/widgets/saloon_screen/saloon_secondary_data.dart';
 import 'package:helawebdesign_saloon/widgets/saloon_screen/saloon_services.dart';
 import 'package:route_transitions/route_transitions.dart';
@@ -28,21 +33,17 @@ class SaloonScreen extends StatefulWidget {
 
 class _SaloonScreenState extends State<SaloonScreen>
     with SingleTickerProviderStateMixin {
-
   List<Service> _selectedServices = [];
 
   void selectedServicesFunc(Service s) {
-     bool x = _selectedServices.contains(s);
-     if(x){
-       _selectedServices.remove(s);
-     }
-     else{
-       _selectedServices.add(s);
-     }
+    bool x = _selectedServices.contains(s);
+    if (x) {
+      _selectedServices.remove(s);
+    } else {
+      _selectedServices.add(s);
+    }
 
-     _selectedServices.forEach((element) {
-     });
-
+    _selectedServices.forEach((element) {});
   }
 
   int currentIndex = 0;
@@ -148,15 +149,24 @@ class _SaloonScreenState extends State<SaloonScreen>
                     SaloonPrimaryData(
                       saloonName: widget.saloonName,
                     ),
-                    SaloonSecondaryData(additionalData: widget.saloon.additionalData,description: widget.saloon.description,),
+                    SaloonSecondaryData(
+                      additionalData: widget.saloon.additionalData,
+                      description: widget.saloon.description,
+                    ),
                     SizedBox(
                       height: 20,
                     ),
-                    SaloonServices(selectionChange: selectedServicesFunc,),
+                    SaloonServices(
+                      selectionChange: selectedServicesFunc,
+                    ),
                     SizedBox(
                       height: 20,
                     ),
-                    SaloonImageSlider()
+
+                    SaloonImageSlider(),
+
+                    SaloonReviews(),
+
                   ],
                 ),
               ),
@@ -183,7 +193,8 @@ class _SaloonScreenState extends State<SaloonScreen>
                     context,
                     PageRouteTransition(
                       animationType: AnimationType.slide_right,
-                      builder: (context) => SaloonServicesScreen(selectedServices: _selectedServices),
+                      builder: (context) => SaloonServicesScreen(
+                          selectedServices: _selectedServices),
                     ),
                   );
                 },

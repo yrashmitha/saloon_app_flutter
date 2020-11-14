@@ -90,20 +90,21 @@ class SaloonCard extends StatelessWidget {
                 ),
                 Container(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       SizedBox(
                         height: 5,
                       ),
                       Text(
-                        saloon.name,
+                        saloon.name, overflow: TextOverflow.ellipsis,
                         style: TextStyle(fontSize: 20),
                       ),
                       SizedBox(
                         height: 5,
                       ),
                       Text(
-                       saloon.address,
+                       saloon.address,overflow: TextOverflow.ellipsis,
                         style: TextStyle(color: kSubTitleColor),
                       ),
                       SizedBox(
