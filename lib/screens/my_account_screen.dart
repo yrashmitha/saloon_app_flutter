@@ -9,6 +9,9 @@ import 'package:helawebdesign_saloon/providers/user_provider.dart';
 import 'package:provider/provider.dart';
 
 class MyAccountScreen extends StatefulWidget {
+
+  static String id = 'my-account-screen';
+
   @override
   _MyAccountScreenState createState() => _MyAccountScreenState();
 }
@@ -83,7 +86,7 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
     final user = userProvider.accountUser;
 
     return loading
-        ? Center(child: CircularProgressIndicator())
+        ? Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(kMainYellowColor),))
         : Scaffold(
             backgroundColor: Colors.white,
             body: SingleChildScrollView(

@@ -4,6 +4,8 @@ class SaloonAppointment{
   String appointmentId;
   String saloonId;
   String userId;
+  String status;
+  int price;
   Timestamp dateTime;
   List<dynamic> bookedServices;
 

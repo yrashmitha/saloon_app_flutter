@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:helawebdesign_saloon/models/saloon.dart';
 import 'package:helawebdesign_saloon/models/service.dart';
+import 'package:helawebdesign_saloon/providers/appointment_provider.dart';
+import 'package:provider/provider.dart';
 
 class SaloonsProvider with ChangeNotifier {
   List<Saloon> _saloons = [];
@@ -20,9 +22,10 @@ class SaloonsProvider with ChangeNotifier {
 
   Saloon get selectedSaloon => _selectedSaloon;
 
-  void setSelectedSaloon(Saloon value) {
+  void setSelectedSaloon(Saloon value,BuildContext context) {
     print("saloon setted");
     _selectedSaloon = value;
+    Provider.of<AppointmentProvider>(context,listen: false).clearServices();
   }
 
   List<Service> get getAllService => allServices;
@@ -64,6 +67,8 @@ class SaloonsProvider with ChangeNotifier {
                       doc.data()["address"],
                       doc.data()["gender"],
                       doc.data()["additional_data"],
+                      doc.data()['open_time'],
+                      doc.data()['close_time'],
                       doc.data()['appointment_interval'],
                       returnMyServicesArray(doc.data()["services"]),
                       doc.data()['gallery'] == null
@@ -82,6 +87,7 @@ class SaloonsProvider with ChangeNotifier {
   }
 
   Future<void> getAllServicesFromThisSaloon(String saloonId) async {
+    print('saloon proviedr get all services runing');
     List<Service> sList = [];
     await Firebase.initializeApp();
     try {

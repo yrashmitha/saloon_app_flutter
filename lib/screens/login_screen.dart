@@ -16,6 +16,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   AppUser user;
   AuthProvider auth;
+  bool  loading=false;
 
   @override
   void initState() {
@@ -25,7 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    bool  loading=false;
+
     final media = MediaQuery.of(context).size;
     final double vertical = media.height * 0.1;
     auth = Provider.of<AuthProvider>(context);
@@ -33,7 +34,15 @@ class _LoginScreenState extends State<LoginScreen> {
     // user = auth.currentUser;
     return SafeArea(
       child: Scaffold(
-          body: loading ? Center(child: CircularProgressIndicator()) :Container(
+          body: loading ? Center(child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation(kMainYellowColor),
+              ),
+              Text("Hold on just a second...")
+            ],
+          )) :Container(
         width: double.infinity,
         decoration: BoxDecoration(
 
@@ -52,7 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               SizedBox(height: media.height* .05,),
               Text(
-                "Hela Saloon",
+                "Hela Saloonz",
                 style: TextStyle(
                     fontSize: 40,
                     fontWeight: FontWeight.bold,
@@ -75,7 +84,11 @@ class _LoginScreenState extends State<LoginScreen> {
                         setState(() {
                           loading=true;
 
-                          auth.handleSignIn().then((value) => loading=false);
+                          auth.handleSignIn().then((value) {
+                            setState(() {
+                             loading=false;
+                            });
+                          });
                         });
 
                       },

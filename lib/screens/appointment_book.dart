@@ -1,18 +1,26 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:helawebdesign_saloon/models/appointment.dart';
 import 'package:helawebdesign_saloon/models/constants.dart';
 import 'package:helawebdesign_saloon/models/service.dart';
 import 'package:helawebdesign_saloon/providers/appointment_provider.dart';
+import 'package:helawebdesign_saloon/providers/navigation_provider.dart';
 import 'package:helawebdesign_saloon/providers/saloons_provider.dart';
 import 'package:helawebdesign_saloon/screens/home_screen.dart';
+import 'package:helawebdesign_saloon/screens/my_account_screen.dart';
+import 'package:helawebdesign_saloon/screens/saloon_screen.dart';
+import 'package:helawebdesign_saloon/screens/saloon_services_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
 class AppointmentBookingScreen extends StatefulWidget {
-   static String id = 'appointmentBookingScreen';
-  List<Service> serviceList;
-  double price;
+  static String id = 'appointmentBookingScreen';
 
-  AppointmentBookingScreen({this.serviceList, this.price});
+
+  final double price;
+
+  AppointmentBookingScreen({this.price});
 
   @override
   _AppointmentBookingScreenState createState() =>
@@ -20,12 +28,35 @@ class AppointmentBookingScreen extends StatefulWidget {
 }
 
 class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
+  var loading = false;
+  List<Service> serviceList;
+  List<Route> arrayRoutes = [];
+
+  SaloonsProvider _saloonsProvider;
+
   @override
   void initState() {
-    Future.delayed(Duration.zero).then((_) => {
-          Provider.of<AppointmentProvider>(context, listen: false)
-              .getAppoinmentsFromDb()
+    setState(() {
+      loading = true;
+    });
+
+
+
+
+
+    Future.delayed(Duration.zero).then((_) {
+      _saloonsProvider = Provider.of<SaloonsProvider>(context, listen: false);
+      Provider.of<AppointmentProvider>(context, listen: false)
+          .getAppointmentsFromDb()
+          .then((value) {
+        setState(() {
+          loading = false;
         });
+      });
+      serviceList = Provider.of<AppointmentProvider>(context, listen: false)
+          .getUserSelectedService;
+    });
+
     super.initState();
   }
 
@@ -34,16 +65,19 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
   List<Meeting> _getDataSource() {
     meetings = [];
     final appointments =
-        Provider.of<AppointmentProvider>(context).getAppointments;
+        Provider.of<AppointmentProvider>(context, listen: false)
+            .getAppointments;
+
     for (var i = 0; i < appointments.length; i++) {
       var date = DateTime.fromMicrosecondsSinceEpoch(
           appointments[i].dateTime.microsecondsSinceEpoch);
       final DateTime today = DateTime.now();
       final DateTime startTime = DateTime(
           date.year, date.month, date.day, date.hour, date.minute, date.second);
-      final DateTime endTime = startTime.add(const Duration(hours: 1));
-      meetings.add(Meeting(
-          'Booked', startTime, endTime, kMainYellowColor, false));
+      final interval = _saloonsProvider.selectedSaloon.appointmentInterval;
+      final DateTime endTime = startTime.add(Duration(minutes: interval));
+      meetings
+          .add(Meeting('Booked', startTime, endTime, kMainYellowColor, false));
     }
     return meetings;
   }
@@ -84,70 +118,114 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
     });
   }
 
-  DateTime _minDate=DateTime.now();
-  DateTime _maxDate = DateTime.now().add(Duration(days: 30),);
+  DateTime _minDate = DateTime.now();
+  DateTime _maxDate = DateTime.now().add(
+    Duration(days: 30),
+  );
 
+  void popUpLogic(){
+    bool x = Navigator.canPop(context);
+    while(x){
+      Navigator.pop(context);
+      x = Navigator.canPop(context);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final contextSize = MediaQuery.of(context).size;
-    final selectedSaloon = Provider.of<SaloonsProvider>(context).selectedSaloon;
+    final provider = Provider.of<SaloonsProvider>(context);
+    final appProvider = Provider.of<AppointmentProvider>(context);
+    final selectedSaloon = provider.selectedSaloon;
     return SafeArea(
       child: Scaffold(
           appBar: AppBar(
             title: Text("Select date and time"),
           ),
-          body: Container(
-              child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Container(
-                height: MediaQuery.of(context).size.height * .7,
-                child: SfCalendar(
-                  minDate: DateTime(_minDate.year, _minDate.month, _minDate.day, 12 , 0, 0),
-                  maxDate: _maxDate,
-                  showNavigationArrow: true,
-                  headerStyle: CalendarHeaderStyle(
-                    textStyle: TextStyle(
-                      fontFamily: 'Montserrat',
+          body: loading
+              ? Center(
+                  child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation(kMainYellowColor),
+                ))
+              : Container(
+                  child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Container(
+                      height: MediaQuery.of(context).size.height * .7,
+                      child: SfCalendar(
+                        minDate: DateTime(_minDate.year, _minDate.month,
+                            _minDate.day, 12, 0, 0),
+                        maxDate: _maxDate,
+                        showNavigationArrow: true,
+                        headerStyle: CalendarHeaderStyle(
+                          textStyle: TextStyle(
+                            fontFamily: 'Montserrat',
+                          ),
+                        ),
+                        dataSource: MeetingDataSource(_getDataSource()),
+                        onTap: (CalendarTapDetails details) {
+                          // setState(() {
+                          //   loading = true;
+                          // });
+
+                          final user = FirebaseAuth.instance.currentUser;
+                          var app = SaloonAppointment(
+                              null,
+                              provider.selectedSaloon.id,
+                              user.uid,
+                              Timestamp.fromDate(details.date),
+                              serviceList);
+                          // appProvider.addAppointment(app).then((value) {
+                          //   setState(() {
+                          //     loading = false;
+                          //   });
+                          // });
+
+
+                          popUpLogic();
+
+
+                          Provider.of<NavigationProvider>(context,listen: false).changePage(1);
+                          // Navigator.pushNamed(context, MyAccountScreen.id);
+
+
+
+                          // _showAlert(details);
+                        },
+                        view: CalendarView.workWeek,
+                        timeSlotViewSettings: TimeSlotViewSettings(
+                            timeInterval: Duration(
+                                minutes: selectedSaloon.appointmentInterval),
+                            timeFormat: 'hh:mm',
+                            startHour: selectedSaloon.openTime.toDouble(),
+                            endHour: selectedSaloon.closeTime.toDouble(),
+                            nonWorkingDays: <int>[
+                              DateTime.sunday,
+                              DateTime.saturday
+                            ]),
+                      ),
                     ),
-                  ),
-                  dataSource: MeetingDataSource(_getDataSource()),
-                  onTap: (CalendarTapDetails details) {
-                    _showAlert(details);
-                  },
-                  view: CalendarView.week,
-                  timeSlotViewSettings: TimeSlotViewSettings(
-                    timeInterval: Duration(minutes: selectedSaloon.appointmentInterval),
-                      timeFormat: 'hh:mm',
-                      startHour: 9,
-                      endHour: 16,
-                      nonWorkingDays: <int>[
-                        DateTime.sunday,
-                        DateTime.saturday
-                      ]),
-                ),
-              ),
-              // SizedBox(
-              //   height: contextSize.height * 0.1,
-              // ),
-              Expanded(
-                child: Container(
-                  width: contextSize.width * .7,
-                  decoration: BoxDecoration(
-                      color: kMainYellowColor,
-                      borderRadius: BorderRadius.circular(12)),
-                  child: Center(
-                    child: Text(
-                      "Rs. ${widget.price.toStringAsFixed(2)}",
-                      style:
-                          TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-              )
-            ],
-          ))),
+                    // SizedBox(
+                    //   height: contextSize.height * 0.1,
+                    // ),
+                    Expanded(
+                      child: Container(
+                        width: contextSize.width * .7,
+                        decoration: BoxDecoration(
+                            color: kMainYellowColor,
+                            borderRadius: BorderRadius.circular(12)),
+                        child: Center(
+                          child: Text(
+                            "Rs. ${widget.price.toStringAsFixed(2)}",
+                            style: TextStyle(
+                                fontSize: 25, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                    )
+                  ],
+                ))),
     );
   }
 

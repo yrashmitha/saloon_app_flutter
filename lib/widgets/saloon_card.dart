@@ -17,7 +17,7 @@ class SaloonCard extends StatelessWidget {
 
 
   void setSelectedSaloon(Saloon id,BuildContext context) {
-    Provider.of<SaloonsProvider>(context, listen: false).setSelectedSaloon(id);
+    Provider.of<SaloonsProvider>(context, listen: false).setSelectedSaloon(id,context);
   }
 
   @override

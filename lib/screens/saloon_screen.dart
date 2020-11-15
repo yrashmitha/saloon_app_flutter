@@ -8,6 +8,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:helawebdesign_saloon/models/constants.dart';
 import 'package:helawebdesign_saloon/models/saloon.dart';
 import 'package:helawebdesign_saloon/models/service.dart';
+import 'package:helawebdesign_saloon/providers/appointment_provider.dart';
 
 import 'package:helawebdesign_saloon/screens/saloon_services_screen.dart';
 import 'package:helawebdesign_saloon/widgets/read_more.dart';
@@ -17,6 +18,7 @@ import 'package:helawebdesign_saloon/widgets/saloon_screen/saloon_review_box.dar
 import 'package:helawebdesign_saloon/widgets/saloon_screen/saloon_reviews.dart';
 import 'package:helawebdesign_saloon/widgets/saloon_screen/saloon_secondary_data.dart';
 import 'package:helawebdesign_saloon/widgets/saloon_screen/saloon_services.dart';
+import 'package:provider/provider.dart';
 import 'package:route_transitions/route_transitions.dart';
 
 class SaloonScreen extends StatefulWidget {
@@ -73,6 +75,9 @@ class _SaloonScreenState extends State<SaloonScreen>
     print("saloon screen init");
     _scrollController = ScrollController();
     _scrollController.addListener(_scrollListener);
+
+
+
     super.initState();
 
     _controller = AnimationController(
@@ -193,8 +198,8 @@ class _SaloonScreenState extends State<SaloonScreen>
                     context,
                     PageRouteTransition(
                       animationType: AnimationType.slide_right,
-                      builder: (context) => SaloonServicesScreen(
-                          selectedServices: _selectedServices),
+                      maintainState: true,
+                      builder: (context) => SaloonServicesScreen(),
                     ),
                   );
                 },

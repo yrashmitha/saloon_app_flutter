@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:helawebdesign_saloon/models/constants.dart';
 import 'package:helawebdesign_saloon/providers/appointment_provider.dart';
 import 'package:helawebdesign_saloon/providers/auth_provider.dart';
+import 'package:helawebdesign_saloon/providers/navigation_provider.dart';
 import 'package:helawebdesign_saloon/providers/saloons_provider.dart';
 import 'package:helawebdesign_saloon/providers/user_provider.dart';
 import 'package:helawebdesign_saloon/screens/appointment_book.dart';
@@ -39,10 +40,12 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (ctx) => AppointmentProvider(),
         ),
+        ChangeNotifierProvider(create: (ctx) => NavigationProvider())
       ],
       child: Consumer<AuthProvider>(
         builder: (ctx,auth,_){
           return MaterialApp(
+            // initialRoute: HomeScreen.id,
             title: 'Hela Saloon',
             theme: ThemeData(
               primaryColor: kDeepBlue,
@@ -64,7 +67,8 @@ class MyApp extends StatelessWidget {
               MyAppointmentsScreen.id: (ctx) => MyAppointmentsScreen(),
               AppointmentBookingScreen.id: (ctx) => AppointmentBookingScreen(),
               SaloonGalleryScreen.id : (ctx) => SaloonGalleryScreen(),
-              SaloonReviewsScreen.id : (ctx) => SaloonReviewsScreen()
+              SaloonReviewsScreen.id : (ctx) => SaloonReviewsScreen(),
+              MyAccountScreen.id : (ctx) =>MyAccountScreen()
             },
           );
         },
@@ -96,7 +100,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
     MyAccountScreen(),
   ];
 
-  int _page = 0;
+  int _page ;
 
   @override
   void initState() {
@@ -107,13 +111,12 @@ class _BottomNavBarState extends State<BottomNavBar> {
 
   @override
   Widget build(BuildContext context) {
-
-    // Provider.of<AuthProvider>(context)
-    //     .isLoggedIn()
-    //     .then((value) => print(value));
+    print('bottm called');
+    NavigationProvider provider = Provider.of<NavigationProvider>(context);
+    _page = provider.page;
     return Scaffold(
       bottomNavigationBar: CurvedNavigationBar(
-        index: widget.page,
+        index: _page,
         height: 50.0,
         key: _bottomNavigationKey,
         items: <Widget>[
@@ -127,12 +130,14 @@ class _BottomNavBarState extends State<BottomNavBar> {
         animationCurve: Curves.ease,
         animationDuration: Duration(milliseconds: 600),
         onTap: (index) {
+
           setState(() {
-            widget.page = index;
+            provider.changePage(index);
+            _page = index;
           });
         },
       ),
-      body: pageOptions[widget.page],
+      body: pageOptions[_page],
     );
   }
 }

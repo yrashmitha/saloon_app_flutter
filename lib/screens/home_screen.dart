@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 import 'package:helawebdesign_saloon/models/constants.dart';
+import 'package:helawebdesign_saloon/providers/navigation_provider.dart';
 import 'package:helawebdesign_saloon/providers/saloons_provider.dart';
 import 'package:helawebdesign_saloon/widgets/category_list.dart';
 import 'package:helawebdesign_saloon/widgets/saloon_card.dart';
@@ -154,7 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Text("Click"),
                 onPressed: (){
                   setState(() {
-                    widget.num++;
+                    Provider.of<NavigationProvider>(context,listen: false).changePage(1);
                   });
                 },
               ),

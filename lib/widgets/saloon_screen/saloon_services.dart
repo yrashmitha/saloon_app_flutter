@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:helawebdesign_saloon/models/constants.dart';
@@ -36,14 +37,15 @@ class _SaloonServicesState extends State<SaloonServices> {
   List<Service> selectedServices;
 
   void selectedServicesFunc(Service s) {
-    bool x = selectedServices.contains(s);
+    bool x= appointmentProvider.isServiceInTheArray(s);
     if(x){
-      selectedServices.remove(s);
+      print('item already in the array');
+      appointmentProvider.removeService(s);
     }
     else{
-      selectedServices.add(s);
+      print('item not in the array so we added');
+      appointmentProvider.addService(s);
     }
-
   }
 
 
@@ -54,7 +56,8 @@ class _SaloonServicesState extends State<SaloonServices> {
   Map<Service,bool> _serviceList={};
   @override
   void initState() {
-    selectedServices = Provider.of<AppointmentProvider>(context,listen: false).getUserSelectedService;
+     appointmentProvider = Provider.of<AppointmentProvider>(context,listen: false);
+    selectedServices = appointmentProvider.getUserSelectedService;
     Future.delayed(Duration.zero).then((_) {
       _serviceList = createServiceList(Provider.of<SaloonsProvider>(context,listen: false).selectedSaloon.services);
     });
@@ -63,6 +66,8 @@ class _SaloonServicesState extends State<SaloonServices> {
 
   @override
   Widget build(BuildContext context) {
+
+
 
     return Container(
       child: Column(
@@ -78,23 +83,11 @@ class _SaloonServicesState extends State<SaloonServices> {
           Column(
             children: _serviceList.keys.map((Service key) {
               return Column(children: [
-                new CheckboxListTile(
-                  secondary: Icon(
-                    FontAwesomeIcons.cut,
-                    color: kDeepBlue,
-                  ),
-                  subtitle: Text(key.description),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 0),
-                  title: new Text(key.name),
-                  value: _serviceList[key],
-                  onChanged: (bool value) {
-                    widget.selectionChange(key);
-                    selectedServicesFunc(key);
-                    setState(() {
-                      _serviceList.update(key, (value) => value);
-                      _serviceList[key] = value;
-                    });
-                  },
+                new ListTile(
+                  leading: Icon(FontAwesomeIcons.cut,
+                    color: kDeepBlue,),
+                  title: Text(key.name),
+                  subtitle:Text(key.description),
                 ),
                 SizedBox(
                   height: 10,
@@ -114,8 +107,9 @@ class _SaloonServicesState extends State<SaloonServices> {
               onPressed: () {
                 Navigator.of(context).push(
                   PageRouteTransition(
+                    maintainState: true,
                       animationType: AnimationType.slide_right,
-                      builder: (context) => SaloonServicesScreen(selectedServices:userSelectedServices),
+                      builder: (context) => SaloonServicesScreen(),
                   ),
                 );
               },
