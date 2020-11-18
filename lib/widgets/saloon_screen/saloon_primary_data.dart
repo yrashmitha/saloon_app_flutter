@@ -4,8 +4,9 @@ import 'package:helawebdesign_saloon/models/constants.dart';
 
 class SaloonPrimaryData extends StatelessWidget {
   final String saloonName;
+  final String address;
 
-  SaloonPrimaryData({this.saloonName});
+  SaloonPrimaryData({this.saloonName,this.address});
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +21,7 @@ class SaloonPrimaryData extends StatelessWidget {
           height: 10,
         ),
         Text(
-          "No 170 Batagama South Kandana",
+          address,
           style: TextStyle(fontSize: 16),
         ),
         SizedBox(

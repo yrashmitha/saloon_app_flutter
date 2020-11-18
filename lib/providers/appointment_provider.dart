@@ -1,61 +1,83 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:helawebdesign_saloon/models/app_user.dart';
 import 'package:helawebdesign_saloon/models/appointment.dart';
 import 'package:helawebdesign_saloon/models/service.dart';
+import 'package:helawebdesign_saloon/providers/saloons_provider.dart';
+import 'package:helawebdesign_saloon/providers/user_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
-class AppointmentProvider with ChangeNotifier{
+class AppointmentProvider with ChangeNotifier {
+  List<Service> _userSelectedServices = [];
 
-   List<Service> _userSelectedServices=[];
+  List<SaloonAppointment> _appointmentList = [];
 
-  List<SaloonAppointment> _appointmentList=[];
+  List<SaloonAppointment> _userAppointments = [];
 
-  List<SaloonAppointment> get getAppointments{
+  List<SaloonAppointment> get getAppointments {
     return [..._appointmentList];
   }
 
-  List<Service> get getUserSelectedService { return _userSelectedServices;}
+  List<SaloonAppointment> get getUserAppointments {
+    return [..._userAppointments];
+  }
 
-  bool isServiceInTheArray(Service s){
-    var x= _userSelectedServices.contains(s);
-   if(x!=null){
+  List<Service> get getUserSelectedService {
+    return _userSelectedServices;
+  }
+
+  bool isServiceInTheArray(Service s) {
+    var x = _userSelectedServices.contains(s);
+    if (x != null) {
       return x;
-   }
-   else{
-     return x;
-   }
-
-
-  }
-
-  void addService(Service service){
-    if(_userSelectedServices.contains(service)){
-      print('service added already in the box');
+    } else {
+      return x;
     }
-    print('service added');
+  }
+
+  void addService(Service service) {
+    if (_userSelectedServices.contains(service)) {}
     _userSelectedServices.add(service);
-    print('$_userSelectedServices');
   }
 
-  void removeService(Service s){
-    print('we have to remove service id ${s.id}');
+  void removeService(Service s) {
     _userSelectedServices.remove(s);
-    _userSelectedServices.forEach((element) {
-      print('${element.id}');});
+    _userSelectedServices.forEach((element) {});
   }
 
-  Future<void> getAppointmentsFromDb() async {
-
+  Future<void> getAppointmentsFromDb(String saloonId) async {
     List<SaloonAppointment> appList = [];
     await Firebase.initializeApp();
-    await FirebaseFirestore.instance.collection('appointments').where('date_time',isGreaterThanOrEqualTo: DateTime.now().subtract(Duration(days: 1)))
-        .get().then((QuerySnapshot querySnapshot) =>
-    {
-      querySnapshot.docs.forEach((doc) {
-        appList.add(SaloonAppointment(doc.id, doc.data()['saloon_id'], doc.data()['user_id'], doc.data()['date_time'], doc.data()['services']));
-      })
-    }).catchError((err){
+    await FirebaseFirestore.instance
+        .collection('appointments')
+        .orderBy('date_time')
+        .where('date_time',
+            isGreaterThanOrEqualTo: DateTime.now().subtract(Duration(days: 1)))
+        .where('saloon_id', isEqualTo: saloonId)
+        .get()
+        .then((QuerySnapshot querySnapshot) => {
+              querySnapshot.docs.forEach((doc) {
+                appList.add(SaloonAppointment(
+                    doc.id,
+                    doc.data()['saloon_id'],
+                    doc.data()['saloon_name'],
+                    doc.data()['saloon_contact_number'],
+                    doc.data()['user_id'],
+                    doc.data()['user_name'],
+                    doc.data()['user_contact_number'],
+                    doc.data()['status'],
+                    doc.data()['price'],
+                    doc.data()['user_image'],
+                    doc.data()['saloon_image'],
+                    doc.data()['date_time'],
+                    doc.data()['services']));
+              })
+            })
+        .catchError((err) {
       print(err);
     });
 
@@ -64,49 +86,125 @@ class AppointmentProvider with ChangeNotifier{
     notifyListeners();
   }
 
-  Future<void> addAppointment(SaloonAppointment app) async{
+  Future<SaloonAppointment> addAppointment(
+      SaloonAppointment app, SaloonsProvider saloonsProvider) async {
     var _id;
     _id = '${app.dateTime.toDate().toString()}@${app.saloonId}';
 
-
-    List<Map<String,dynamic>> bookedServices=[];
+    List<Map<String, dynamic>> bookedServices = [];
     app.bookedServices.forEach((element) {
-      bookedServices.add({
-        'name' : element.name,
-        'price' : element.price
-      });
+      bookedServices.add({'name': element.name, 'price': element.price});
     });
 
+    try {
+      UserProvider user = UserProvider();
+      await user.getUser();
+      String number = user.accountUser.phoneNumber == null
+          ? 'Not Provided'
+          : user.accountUser.phoneNumber;
 
-    //
-    // try{
-    //   await FirebaseFirestore.instance.collection('appointments').doc(_id)
-    //       .set({
-    //     'date_time' : app.dateTime,
-    //     'saloon_id' : app.saloonId,
-    //     'user_id' : app.userId,
-    //     'services' : bookedServices,
-    //     'price' : app.price,
-    //     'status' : 'PENDING'
-    //   }).catchError((e)=>print(e));
-    // }
-    // catch(e){
-    //   throw e;
-    // }
+      await FirebaseFirestore.instance.collection('appointments').doc(_id).set({
+        'date_time': app.dateTime,
+        'saloon_id': app.saloonId,
+        'user_id': app.userId,
+        'services': bookedServices,
+        'price': app.price,
+        'status': 'PENDING',
+        'user_image': app.userImage,
+        'saloon_image': app.saloonImage,
+        'saloon_contact_number': saloonsProvider.selectedSaloon.contactNumber,
+        'user_contact_number': number,
+        'user_email': user.accountUser.email,
+        'user_name': user.accountUser.name,
+        'saloon_name': saloonsProvider.selectedSaloon.name,
+      });
+
+      SaloonAppointment s = SaloonAppointment(
+          null,
+          app.saloonId,
+          saloonsProvider.selectedSaloon.name,
+          saloonsProvider.selectedSaloon.contactNumber,
+          app.userId,
+          user.accountUser.name,
+          number,
+          'PENDING',
+          app.price,
+          app.userImage,
+          app.saloonImage,
+          app.dateTime,
+          bookedServices);
+      clearServices();
+      return s;
+    } on PlatformException catch (e) {
+      print("i got err from fb ${e.message}");
+      return null;
+    }
+  }
+
+  void clearServices() {
+    _userSelectedServices = [];
+  }
+
+  Future<void> getAppointmentsBelongsToUser(bool refresh) async {
+    if(refresh){
+      print('i am running');
+      runThisFunction();
+    }
+    else{
+      if (_userAppointments.length>0) {
+        return;
+      }
+      else{
+        runThisFunction();
+      }
+    }
 
   }
 
-  void clearServices(){
-    _userSelectedServices=[];
+
+  Future<void> runThisFunction() async {
+    List<SaloonAppointment> appList = [];
+    print('appointment getting');
+    final user = FirebaseAuth.instance.currentUser;
+    await FirebaseFirestore.instance
+        .collection('appointments')
+        .orderBy('date_time')
+        .where('user_id', isEqualTo: user.uid)
+        .get()
+        .then((QuerySnapshot querySnapshot) => {
+      querySnapshot.docs.forEach((doc) {
+        print(doc.id);
+                appList.add(SaloonAppointment(
+            doc.id,
+            doc.data()['saloon_id'],
+            doc.data()['saloon_name'],
+            doc.data()['saloon_contact_number'],
+            doc.data()['user_id'],
+            doc.data()['user_name'],
+            doc.data()['user_contact_number'],
+            doc.data()['status'],
+            doc.data()['price'],
+            doc.data()['user_image'],
+            doc.data()['saloon_image'],
+            doc.data()['date_time'],
+            doc.data()['services']));
+      })
+    })
+        .catchError((err) {
+      print(err);
+    });
+
+    _userAppointments = appList;
+
+    notifyListeners();
   }
 
 }
 
 
-class ServiceDetails{
+class ServiceDetails {
   String name;
   int price;
 
-  ServiceDetails(this.name,this.price);
-
+  ServiceDetails(this.name, this.price);
 }

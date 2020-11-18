@@ -1,9 +1,11 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:helawebdesign_saloon/models/constants.dart';
 import 'package:helawebdesign_saloon/providers/saloons_provider.dart';
 import 'package:helawebdesign_saloon/screens/saloon_all_reviews_screen.dart';
 import 'package:helawebdesign_saloon/widgets/read_more.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:route_transitions/route_transitions.dart';
 
@@ -12,7 +14,7 @@ class SaloonReviewBox extends StatelessWidget {
   final String imageUrl;
   final String userName;
   final int star;
-  final String date;
+  final DateTime date;
   final String review;
 
 
@@ -21,6 +23,7 @@ class SaloonReviewBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -30,14 +33,16 @@ class SaloonReviewBox extends StatelessWidget {
                   child: Row(
                     children: [
                       CircleAvatar(
-                        child: ClipRRect(
-                          child: Image.network(
-                            imageUrl,
-                            fit: BoxFit.cover,
-                          ),
-                          borderRadius: BorderRadius.circular(100),
-                        ),
+
+                        // child: ClipRRect(
+                        //   child: Image.network(
+                        //     imageUrl,
+                        //     fit: BoxFit.cover,
+                        //   ),
+                        //   borderRadius: BorderRadius.circular(100),
+                        // ),
                         radius: 30,
+                        backgroundImage: NetworkImage(imageUrl),
                       ),
                       SizedBox(
                         width: 10,
@@ -52,7 +57,7 @@ class SaloonReviewBox extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                               softWrap: true,
                             ),
-                            Text(date.toString().split(" ")[0])
+                            Text(DateFormat.yMMMMEEEEd().format(date))
                           ],
                         ),
                       )

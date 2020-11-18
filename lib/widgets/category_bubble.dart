@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:helawebdesign_saloon/models/category.dart';
+import 'package:helawebdesign_saloon/models/constants.dart';
 
 class CategoryBubble extends StatelessWidget {
   final Category category;
@@ -17,10 +18,13 @@ class CategoryBubble extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Container(
-              height: constraints.maxHeight*.5,
+              height: constraints.maxHeight * .5,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white,
+                gradient: LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Colors.white, kMainYellowColor]),
                 boxShadow: [
                   new BoxShadow(
                     color: Colors.black.withOpacity(0.2),
@@ -28,12 +32,26 @@ class CategoryBubble extends StatelessWidget {
                   )
                 ],
               ),
-              child: Center(child: Icon(category.iconDta)),
+              child: Center(
+                child: FractionallySizedBox(
+                  widthFactor: .7,
+                  heightFactor: .7,
+                  child: Container(
+                    child: Image.asset(
+                     category.path
+                    ),
+                  ),
+                ),
+                widthFactor: 1,
+              ),
             ),
             SizedBox(
               height: constraints.maxHeight * .1,
             ),
-            Text(category.title)
+            Text(
+              category.title,
+              textAlign: TextAlign.center,
+            )
           ],
         ),
       );

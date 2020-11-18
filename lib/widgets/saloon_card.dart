@@ -27,7 +27,7 @@ class SaloonCard extends StatelessWidget {
       width: MediaQuery.of(context).size.width * 0.8,
       child: GestureDetector(
         onTap: () {
-          setSelectedSaloon(saloon,context);
+            setSelectedSaloon(saloon,context);
           Navigator.of(context).push(
             MaterialPageRoute<void>(
               builder: (BuildContext context) {
@@ -120,11 +120,11 @@ class SaloonCard extends StatelessWidget {
                           SizedBox(
                             width: 5,
                           ),
-                          Text("4.7"),
+                          Text("${saloon.rating.toString()}"),
                           SizedBox(
                             width: 5,
                           ),
-                          Text("30 Ratings")
+                          Text("${saloon.ratingsCount.toString()} Ratings")
                         ],
                         crossAxisAlignment: CrossAxisAlignment.center,
                       )

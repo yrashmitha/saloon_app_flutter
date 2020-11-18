@@ -1,21 +1,18 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:helawebdesign_saloon/models/constants.dart';
 import 'package:helawebdesign_saloon/models/saloon.dart';
 import 'package:helawebdesign_saloon/models/service.dart';
-import 'package:helawebdesign_saloon/providers/appointment_provider.dart';
+import 'package:helawebdesign_saloon/providers/saloons_provider.dart';
 
 import 'package:helawebdesign_saloon/screens/saloon_services_screen.dart';
-import 'package:helawebdesign_saloon/widgets/read_more.dart';
 import 'package:helawebdesign_saloon/widgets/saloon_screen/saloon_image_slider.dart';
 import 'package:helawebdesign_saloon/widgets/saloon_screen/saloon_primary_data.dart';
-import 'package:helawebdesign_saloon/widgets/saloon_screen/saloon_review_box.dart';
 import 'package:helawebdesign_saloon/widgets/saloon_screen/saloon_reviews.dart';
+import 'package:helawebdesign_saloon/widgets/saloon_screen/saloon_screen_data.dart';
 import 'package:helawebdesign_saloon/widgets/saloon_screen/saloon_secondary_data.dart';
 import 'package:helawebdesign_saloon/widgets/saloon_screen/saloon_services.dart';
 import 'package:provider/provider.dart';
@@ -76,8 +73,6 @@ class _SaloonScreenState extends State<SaloonScreen>
     _scrollController = ScrollController();
     _scrollController.addListener(_scrollListener);
 
-
-
     super.initState();
 
     _controller = AnimationController(
@@ -95,6 +90,8 @@ class _SaloonScreenState extends State<SaloonScreen>
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<SaloonsProvider>(context);
+    print(widget.saloon.name);
     return Scaffold(
       body: SafeArea(
         child: CustomScrollView(
@@ -118,8 +115,12 @@ class _SaloonScreenState extends State<SaloonScreen>
               actions: [
                 Padding(
                   padding: const EdgeInsets.only(right: 16.0),
-                  child: Icon(
-                    FontAwesomeIcons.solidHeart,
+                  child: IconButton(
+                    onPressed: (){
+                     provider.heartIconTapped();
+                    },
+                    color: provider.isThisFavourite()==true ? Colors.redAccent : Colors.black87,
+                    icon: Icon(FontAwesomeIcons.solidHeart),
                   ),
                 )
               ],
@@ -152,26 +153,12 @@ class _SaloonScreenState extends State<SaloonScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SaloonPrimaryData(
-                      saloonName: widget.saloonName,
-                    ),
-                    SaloonSecondaryData(
-                      additionalData: widget.saloon.additionalData,
-                      description: widget.saloon.description,
-                    ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    SaloonServices(
-                      selectionChange: selectedServicesFunc,
-                    ),
-                    SizedBox(
-                      height: 20,
+                      saloonName: widget.saloon.name.toString(),
+                      address: widget.saloon.address,
                     ),
 
-                    SaloonImageSlider(),
 
-                    SaloonReviews(),
-
+                    SaloonScreenData()
                   ],
                 ),
               ),

@@ -25,7 +25,6 @@ class SaloonImageSlider extends StatelessWidget {
                         return GalleryImage(url: imageList[index],);
                       },
                       fullscreenDialog: true,
-                      curves: Curves.easeInOutBack,
                       animationType: AnimationType.slide_up
                   ));
 

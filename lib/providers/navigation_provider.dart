@@ -6,7 +6,7 @@ class NavigationProvider with ChangeNotifier {
 
   changePage(int i) {
     _pageIndex = i;
-    print('page index called $i');
+    print('page index called fro navigation provider $i');
     notifyListeners();
   }
 }

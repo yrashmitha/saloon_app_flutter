@@ -26,7 +26,7 @@ class SaloonReviews extends StatelessWidget {
           imageUrl: element['user_profile_avatar'],
           userName: element['user_name'],
           star: element['star'],
-          date: element['date'],
+          date: element['date'].toDate(),
           review: element['customer_review'],
         );
         list.add(x);

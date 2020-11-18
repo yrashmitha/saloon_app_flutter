@@ -8,15 +8,18 @@ import 'package:helawebdesign_saloon/providers/navigation_provider.dart';
 import 'package:helawebdesign_saloon/providers/saloons_provider.dart';
 import 'package:helawebdesign_saloon/providers/user_provider.dart';
 import 'package:helawebdesign_saloon/screens/appointment_book.dart';
+import 'package:helawebdesign_saloon/screens/appointment_details.dart';
 import 'package:helawebdesign_saloon/screens/home_screen.dart';
 
 import 'package:helawebdesign_saloon/screens/login_screen.dart';
 import 'package:helawebdesign_saloon/screens/my_account_screen.dart';
 import 'package:helawebdesign_saloon/screens/my_appointments_screen.dart';
+import 'package:helawebdesign_saloon/screens/results_screen.dart';
 import 'package:helawebdesign_saloon/screens/saloon_all_reviews_screen.dart';
 import 'package:helawebdesign_saloon/screens/saloon_gallery_screen.dart';
 import 'package:helawebdesign_saloon/screens/saloon_screen.dart';
 import 'package:helawebdesign_saloon/screens/saloon_services_screen.dart';
+import 'package:helawebdesign_saloon/screens/user_favourites_screen.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -48,6 +51,7 @@ class MyApp extends StatelessWidget {
             // initialRoute: HomeScreen.id,
             title: 'Hela Saloon',
             theme: ThemeData(
+              snackBarTheme: SnackBarThemeData(contentTextStyle: TextStyle(fontFamily: "Montserrat")),
               primaryColor: kDeepBlue,
               primarySwatch: Colors.blueGrey,
               visualDensity: VisualDensity.adaptivePlatformDensity,
@@ -57,6 +61,7 @@ class MyApp extends StatelessWidget {
                   TargetPlatform.android: ZoomPageTransitionsBuilder(),
                 },
               ),
+
             ),
             home:  auth.isAuth!=null ?  Scaffold(body: BottomNavBar(page: 0,)) : LoginScreen(),
             routes: {
@@ -68,7 +73,9 @@ class MyApp extends StatelessWidget {
               AppointmentBookingScreen.id: (ctx) => AppointmentBookingScreen(),
               SaloonGalleryScreen.id : (ctx) => SaloonGalleryScreen(),
               SaloonReviewsScreen.id : (ctx) => SaloonReviewsScreen(),
-              MyAccountScreen.id : (ctx) =>MyAccountScreen()
+              MyAccountScreen.id : (ctx) =>MyAccountScreen(),
+              AppointmentDetailsScreen.id : (ctx) =>AppointmentDetailsScreen(),
+              ResultsScreen.id : (ctx) => ResultsScreen()
             },
           );
         },
@@ -97,6 +104,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
   final pageOptions = [
     HomeScreen(),
     MyAppointmentsScreen(),
+    UserFavouritesScreen(),
     MyAccountScreen(),
   ];
 
@@ -122,6 +130,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
         items: <Widget>[
           Icon(Icons.home, size: 30),
           Icon(Icons.list, size: 30),
+          Icon(Icons.favorite, size: 30),
           Icon(Icons.account_circle_sharp, size: 30),
         ],
         color: kMainYellowColor,

@@ -63,17 +63,17 @@ class SaloonSecondaryData extends StatelessWidget {
           ],
         ),
         Tooltip(
-          message: 'This saloon is verified by HelaWeb Company. ',
+          message: additionalData['is_verified'] ==true ? 'This saloon is verified by HelaWeb Company. ' : 'This saloon is still not verified by HelaWeb Company',
           child: ListTile(
             contentPadding: EdgeInsets.all(0),
             leading: Tooltip(
               child: Icon(
-                FontAwesomeIcons.checkCircle,
+                additionalData['is_verified'] == true ? FontAwesomeIcons.checkCircle : Icons.highlight_remove_sharp,
                 color: Colors.black,
               ),
               message: 'This saloon is verified by HelaWeb Company. ',
             ),
-            title: Text("Verified"),
+            title:additionalData['is_verified'] ==true ? Text("Verified") : Text("Not Verified"),
           ),
         ),
         ListTile(

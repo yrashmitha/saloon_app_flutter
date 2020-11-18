@@ -38,7 +38,7 @@ class SaloonReviewsScreen extends StatelessWidget {
                         imageUrl: snapshot.data[index]['user_profile_avatar'],
                         userName: snapshot.data[index]['user_name'],
                         star: snapshot.data[index]['star'],
-                        date: snapshot.data[index]['date'],
+                        date: snapshot.data[index]['date'].toDate(),
                         review: snapshot.data[index]['customer_review'],
                       ),
                     ),
