@@ -1,3 +1,6 @@
+import 'dart:developer';
+
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -74,6 +77,7 @@ class AppointmentProvider with ChangeNotifier {
                     doc.data()['user_image'],
                     doc.data()['saloon_image'],
                     doc.data()['date_time'],
+                    doc.data()['is_reviewed']!=null ? doc.data()['is_reviewed'] : false,
                     doc.data()['services']));
               })
             })
@@ -103,7 +107,7 @@ class AppointmentProvider with ChangeNotifier {
           ? 'Not Provided'
           : user.accountUser.phoneNumber;
 
-      await FirebaseFirestore.instance.collection('appointments').doc(_id).set({
+       await FirebaseFirestore.instance.collection('appointments').doc(_id).set({
         'date_time': app.dateTime,
         'saloon_id': app.saloonId,
         'user_id': app.userId,
@@ -120,7 +124,7 @@ class AppointmentProvider with ChangeNotifier {
       });
 
       SaloonAppointment s = SaloonAppointment(
-          null,
+          _id,
           app.saloonId,
           saloonsProvider.selectedSaloon.name,
           saloonsProvider.selectedSaloon.contactNumber,
@@ -132,6 +136,7 @@ class AppointmentProvider with ChangeNotifier {
           app.userImage,
           app.saloonImage,
           app.dateTime,
+          app.isReviewed,
           bookedServices);
       clearServices();
       return s;
@@ -145,17 +150,19 @@ class AppointmentProvider with ChangeNotifier {
     _userSelectedServices = [];
   }
 
-  Future<void> getAppointmentsBelongsToUser(bool refresh) async {
+  Future<bool> getAppointmentsBelongsToUser(bool refresh) async {
     if(refresh){
       print('i am running');
       runThisFunction();
+      return true;
     }
     else{
       if (_userAppointments.length>0) {
-        return;
+        return false;
       }
       else{
         runThisFunction();
+        return false;
       }
     }
 
@@ -187,6 +194,7 @@ class AppointmentProvider with ChangeNotifier {
             doc.data()['user_image'],
             doc.data()['saloon_image'],
             doc.data()['date_time'],
+            doc.data()['is_reviewed']!=null ? doc.data()['is_reviewed'] : false,
             doc.data()['services']));
       })
     })
@@ -195,8 +203,58 @@ class AppointmentProvider with ChangeNotifier {
     });
 
     _userAppointments = appList;
+    print(_userAppointments.length);
 
     notifyListeners();
+  }
+
+
+
+  Future<bool> cancelAppointment(String id)async{
+    log("hi");
+    try{
+      await FirebaseFirestore.instance.collection('appointments').doc(id).update({'status' : 'CANCELLED'}).then((_){
+        return true;
+      })
+          .catchError((e){
+        throw e;
+      });
+    } on PlatformException catch(e){
+      throw e;
+    }
+    return false;
+  }
+
+
+  Future<void> postReview(BuildContext context,int star,String review,String appointmentId,String saloonId)async{
+
+    try{
+      var res = await FirebaseFirestore.instance.collection("appointments/").doc(appointmentId).update({
+        'review' :{
+          'user_name' : FirebaseAuth.instance.currentUser.displayName,
+          'user_profile_avatar' : FirebaseAuth.instance.currentUser.photoURL,
+          'date' : Timestamp.now(),
+          'star' : star,
+          'customer_review' : review,
+          'appointment_id' :appointmentId
+        },
+        'is_reviewed' :true
+      });
+
+      var second = await FirebaseFirestore.instance.collection("saloons/$saloonId/all_reviews")
+          .add({
+        'user_name' : FirebaseAuth.instance.currentUser.displayName,
+        'user_profile_avatar' : FirebaseAuth.instance.currentUser.photoURL,
+        'date' : Timestamp.now(),
+        'star' : star,
+        'customer_review' : review,
+        'appointment_id' :appointmentId
+      });
+
+    } on PlatformException catch(e){
+      throw e;
+    }
+
   }
 
 }

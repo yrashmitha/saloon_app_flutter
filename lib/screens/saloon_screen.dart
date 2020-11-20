@@ -155,6 +155,8 @@ class _SaloonScreenState extends State<SaloonScreen>
                     SaloonPrimaryData(
                       saloonName: widget.saloon.name.toString(),
                       address: widget.saloon.address,
+                      ratings: widget.saloon.rating,
+                      ratingsCount: widget.saloon.ratingsCount,
                     ),
 
 

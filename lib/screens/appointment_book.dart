@@ -133,6 +133,7 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
                       user.photoURL,
                       _saloonsProvider.selectedSaloon.featuredImageUrl,
                       Timestamp.fromDate(details.date),
+                      false,
                       serviceList);
 
 

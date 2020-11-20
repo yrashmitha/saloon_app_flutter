@@ -13,6 +13,7 @@ class SaloonAppointment {
   String saloonImage;
   String userImage;
   Timestamp dateTime;
+  bool isReviewed;
   List<dynamic> bookedServices;
 
   SaloonAppointment(
@@ -28,5 +29,6 @@ class SaloonAppointment {
       this.userImage,
       this.saloonImage,
       this.dateTime,
+      this.isReviewed,
       this.bookedServices);
 }

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +12,7 @@ import 'package:helawebdesign_saloon/screens/results_screen.dart';
 import 'package:helawebdesign_saloon/widgets/category_list.dart';
 import 'package:helawebdesign_saloon/widgets/saloon_card.dart';
 import 'package:provider/provider.dart';
+import 'package:route_transitions/route_transitions.dart';
 
 class HomeScreen extends StatefulWidget {
   static String id = 'home-screen';
@@ -82,7 +85,14 @@ class _HomeScreenState extends State<HomeScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Align(
-                                  child: Icon(Icons.filter_alt_sharp)),
+                                child: IconButton(
+                                  icon: Icon(Icons.filter_alt_sharp),
+                                  onPressed: () {
+                                    log("ft");
+                                    _settingModalBottomSheet(context);
+                                  },
+                                ),
+                              ),
                               SizedBox(
                                 height: (constraints.maxHeight -
                                         appBar.preferredSize.height) *
@@ -118,18 +128,18 @@ class _HomeScreenState extends State<HomeScreen> {
                                             textBaseline:
                                                 TextBaseline.alphabetic)),
                                     textAlign: TextAlign.start,
-
-
-                                    onSubmitted: (value){
-                                      Navigator.push(context, MaterialPageRoute(builder: (ctx){
-                                        return ResultsScreen(searchKey: value,);
+                                    onSubmitted: (value) {
+                                      Provider.of<SaloonsProvider>(context,listen: false).searchByName(value);
+                                      Navigator.push(context,
+                                          MaterialPageRoute(builder: (ctx) {
+                                        return ResultsScreen(
+                                          searchKey: value,
+                                        );
                                       }));
                                     },
                                   ),
                                 ),
                               ),
-
-
                             ],
                           );
                         }),
@@ -148,8 +158,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 CategoryList(),
                 Padding(
-                  padding: const EdgeInsets.only(left:10.0),
-                  child: Text("Top Rated Saloons",style: kSaloonName,),
+                  padding: const EdgeInsets.only(left: 10.0),
+                  child: Text(
+                    "Top Rated Saloons",
+                    style: kSaloonName,
+                  ),
                 ),
                 Container(
                   height: 250,
@@ -163,18 +176,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     itemCount: saloons.length,
                   ),
                 ),
-
-
-                // RaisedButton(
-                //   child: Text("Add a saloon"),
-                //   onPressed: (){
-                //     data.addSaloon().then((value){
-                //       Scaffold.of(context).showSnackBar(SnackBar(content: Text("Saloon Added")));
-                //     });
-                //   },
-                // )
-
-
+                RaisedButton(
+                  child: Text("Add a saloon"),
+                  onPressed: () {
+                    data.addReview().then((value) {
+                      Scaffold.of(context).showSnackBar(
+                          SnackBar(content: Text("review Added")));
+                    });
+                  },
+                )
               ],
             ),
           ]),
@@ -182,4 +192,56 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+}
+
+void _settingModalBottomSheet(context) {
+  showModalBottomSheet(
+      context: context,
+      builder: (BuildContext bc) {
+        return Container(
+          height: MediaQuery.of(context).size.height * .4,
+          decoration: BoxDecoration(),
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                Text(
+                  "Select your City",
+                  style: kSaloonName,
+                ),
+                Container(
+                  height: MediaQuery.of(context).size.height * .4,
+                  child: ListView.builder(
+                    itemBuilder: (ctx, index) {
+                      return GestureDetector(
+                        onTap: () {
+                          Provider.of<SaloonsProvider>(context,listen: false).search(kCityList[index], '', '');
+                          Navigator.pop(ctx);
+                          Navigator.push(context,
+                              PageRouteTransition(builder: (ctx) {
+                            return ResultsScreen(searchKey: kCityList[index],city:  kCityList[index],);
+                          }));
+                        },
+                        child: Column(
+                          children: [
+                            ListTile(
+                              title: Text(kCityList[index]),
+                              trailing: Icon(Icons.arrow_forward_sharp),
+                              contentPadding: EdgeInsets.all(0),
+                            ),
+                            Divider()
+                          ],
+                        ),
+                      );
+                    },
+                    itemCount: kCityList.length,
+                  ),
+                )
+              ]),
+            ),
+          ),
+        );
+      });
 }

@@ -5,8 +5,10 @@ import 'package:helawebdesign_saloon/models/constants.dart';
 class SaloonPrimaryData extends StatelessWidget {
   final String saloonName;
   final String address;
+  final int ratingsCount;
+  final double ratings;
 
-  SaloonPrimaryData({this.saloonName,this.address});
+  SaloonPrimaryData({@required this.saloonName,@required this.address,@required this.ratingsCount,@required this.ratings});
 
   @override
   Widget build(BuildContext context) {
@@ -38,10 +40,10 @@ class SaloonPrimaryData extends StatelessWidget {
                 color: Color(0xFFDAA520),
               ),
               Text(
-                "4.9 Ratings",
+                "${ratings.toString()} Ratings",
                 style: TextStyle(fontWeight: FontWeight.w700),
               ),
-              Text("(53)"),
+              Text("(${ratingsCount.toString()})"),
             ],
           ),
         ),

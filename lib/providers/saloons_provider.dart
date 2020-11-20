@@ -15,7 +15,14 @@ class SaloonsProvider with ChangeNotifier {
 
   Saloon _selectedSaloon;
 
+  bool _fromDrawer = false;
+
+  bool get drawer {
+    return _fromDrawer;
+  }
+
   List<Saloon> _favouriteSaloons = [];
+
 
   List<Saloon> get getFavouriteSaloons {
     return _favouriteSaloons;
@@ -85,7 +92,6 @@ class SaloonsProvider with ChangeNotifier {
             [],
           ));
         });
-
       }).catchError((e) {
         print(e);
         throw e;
@@ -93,7 +99,7 @@ class SaloonsProvider with ChangeNotifier {
 
       _saloons = sList;
 
-      var f  =  await getMyFavourites();
+      var f = await getMyFavourites();
 
       notifyListeners();
     } on PlatformException catch (e) {
@@ -132,7 +138,7 @@ class SaloonsProvider with ChangeNotifier {
             [],
           ));
         });
-        _favouriteSaloons=list;
+        _favouriteSaloons = list;
       }).catchError((e) {
         print("err");
       });
@@ -154,13 +160,13 @@ class SaloonsProvider with ChangeNotifier {
         _selectedSaloon.openTime = doc.data()['open_time'];
         _selectedSaloon.closeTime = doc.data()['close_time'];
         _selectedSaloon.appointmentInterval =
-            doc.data()['appointment_interval'];
+        doc.data()['appointment_interval'];
         _selectedSaloon.services =
             returnMyServicesArray(doc.data()["services"]);
         selectedSaloon.smallGallery =
-            doc.data()['gallery'] == null ? [] : doc.data()['gallery'];
+        doc.data()['gallery'] == null ? [] : doc.data()['gallery'];
         _selectedSaloon.reviews =
-            doc.data()['reviews'] == null ? [] : doc.data()['reviews'];
+        doc.data()['reviews'] == null ? [] : doc.data()['reviews'];
 
         print(selectedSaloon.name);
 
@@ -182,15 +188,16 @@ class SaloonsProvider with ChangeNotifier {
       await FirebaseFirestore.instance
           .collection('saloons/$saloonId/all_services')
           .get()
-          .then((QuerySnapshot querySnapshot) => {
-                querySnapshot.docs.forEach((doc) {
-                  sList.add(Service(
-                      id: doc.id,
-                      name: doc['name'],
-                      description: doc['description'],
-                      price: doc['price']));
-                })
-              })
+          .then((QuerySnapshot querySnapshot) =>
+      {
+        querySnapshot.docs.forEach((doc) {
+          sList.add(Service(
+              id: doc.id,
+              name: doc['name'],
+              description: doc['description'],
+              price: doc['price']));
+        })
+      })
           .catchError((onError) {
         print(onError);
       });
@@ -249,7 +256,6 @@ class SaloonsProvider with ChangeNotifier {
     });
     return x;
   }
-
 
 
   Future<void> deleteSaloonFromFavourites() async {
@@ -340,6 +346,7 @@ class SaloonsProvider with ChangeNotifier {
   }
 
   Future<void> searchByName(String key) async {
+    list=[];
     print('search by name');
 
     try {
@@ -363,6 +370,43 @@ class SaloonsProvider with ChangeNotifier {
     }
   }
 
+
+  List<QueryDocumentSnapshot> list = [];
+
+  Future<void> search(String city, String category, String gender) async {
+    list=[];
+    notifyListeners();
+    if (city == "") {
+      city = null;
+    }
+    if (category == "") {
+      category = null;
+    }
+    if (gender == "") {
+      gender = null;
+    }
+
+    try {
+      log("data getting search");
+      return await FirebaseFirestore.instance
+          .collection('saloons')
+          .where('base_location', isEqualTo: city).
+      where('gender', isEqualTo: gender).
+      where(
+          'categories', arrayContainsAny: category == null ? null : [category]).
+      get().then((value) {
+        value.docs.forEach((element) {
+          list.add(element);
+        });
+        notifyListeners();
+      }
+    );
+
+    } on PlatformException catch (e) {
+    print(e.message);
+    }
+  }
+
   Future<void> addSaloon() async {
     await FirebaseFirestore.instance.collection('saloons').add({
       'base_location': 'Colombo',
@@ -370,7 +414,7 @@ class SaloonsProvider with ChangeNotifier {
       'address': 'No 120 Kottawa Rd Samanpura Piliyandala',
       "gender": "FEMALE",
       "main-image_url":
-          "https://firebasestorage.googleapis.com/v0/b/saloonapp-c93ca.appspot.com/o/wedding.jpg?alt=media&token=d1283eb7-99dc-4d2a-a53a-eda50cc99af0",
+      "https://firebasestorage.googleapis.com/v0/b/saloonapp-c93ca.appspot.com/o/wedding.jpg?alt=media&token=d1283eb7-99dc-4d2a-a53a-eda50cc99af0",
       "ratings_count": 283,
       "rating": 4.5,
       "lower_case": "nipuni fashion",
@@ -410,6 +454,14 @@ class SaloonsProvider with ChangeNotifier {
           "https://firebasestorage.googleapis.com/v0/b/saloonapp-c93ca.appspot.com/o/wedding.jpg?alt=media&token=d1283eb7-99dc-4d2a-a53a-eda50cc99af0"
         ]
       });
+    });
+  }
+
+  Future<void> addReview() async {
+    final user = FirebaseAuth.instance.currentUser;
+    await FirebaseFirestore.instance.collection('reviews').add({
+      "user_id": user.uid,
+      "star": 4
     });
   }
 }
