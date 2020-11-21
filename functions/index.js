@@ -3,14 +3,31 @@ const admin = require('firebase-admin');
 admin.initializeApp();
 const db = admin.firestore();
 
-exports.createUser = functions.firestore
+exports.addReview = functions.firestore
     .document('saloons/{saloonId}/all_reviews/{reviewId}')
     .onCreate((snap, context) => {
-      // Get an object representing the document
+        // Get an object representing the document
 
-      const newValue = snap.data();
-      db.doc('saloons/{saloonId}/all_reviews/{reviewId}').set({ ... });
+        const newValue = snap.data();
+        const id = context.params.saloonId;
 
-      console.log(context.params.saloonId);
+        var arr=[];
 
+        return db.collection("saloons/"+id+"/all_reviews").orderBy("date", "desc").limit(2)
+            .get().then(function (snap) {
+                snap.forEach(function(doc) {
+                    arr.push(doc.data());
+                });
+
+                db.collection("saloons/"+id+"/data").doc(id).update({
+                    'reviews':arr
+                }).then(function () {
+                    return null;
+                })
+
+
+            });
     });
+
+
+

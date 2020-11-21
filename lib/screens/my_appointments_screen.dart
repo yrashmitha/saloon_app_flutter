@@ -153,6 +153,7 @@ class _MyAppointmentsScreenState extends State<MyAppointmentsScreen> {
                                                     return AppointmentDetailsScreen(
                                                       appointment:
                                                           appointments[index],
+                                                      fromBookingPage: false,
                                                     );
                                                   }));
                                         },
@@ -172,6 +173,4 @@ class _MyAppointmentsScreenState extends State<MyAppointmentsScreen> {
       ),
     );
   }
-
-
 }

@@ -134,7 +134,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
           Icon(Icons.account_circle_sharp, size: 30),
         ],
         color: kMainYellowColor,
-        buttonBackgroundColor: kMainYellowColor,
+        buttonBackgroundColor: kMainYellowColor, 
         backgroundColor: Colors.white,
         animationCurve: Curves.ease,
         animationDuration: Duration(milliseconds: 600),

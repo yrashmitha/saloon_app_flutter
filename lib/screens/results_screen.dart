@@ -51,7 +51,8 @@ class _ResultsScreenState extends State<ResultsScreen> {
         endDrawer: MyDrawer(
           func: advanceSearch,
         ),
-        body: list.length >0 ? ListView.builder(
+        body: provider.isDataReady ? (list.length> 0 ?
+        ListView.builder(
             itemCount: list.length,
             itemBuilder: (ctx, index) {
               Saloon s = Saloon(
@@ -90,7 +91,8 @@ class _ResultsScreenState extends State<ResultsScreen> {
                   saloon: s,
                 ),
               );
-            }) : Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(kMainYellowColor),),),
+            }) : Center(child: Text("No results",style: kSaloonName,))):
+         Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(kMainYellowColor),),),
       ),
     );
   }

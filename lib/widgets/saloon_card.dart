@@ -120,7 +120,7 @@ class SaloonCard extends StatelessWidget {
                           SizedBox(
                             width: 5,
                           ),
-                          Text("${saloon.rating.toString()}"),
+                          Text("${saloon.rating.toStringAsFixed(3)}"),
                           SizedBox(
                             width: 5,
                           ),

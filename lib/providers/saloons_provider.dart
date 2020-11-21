@@ -84,7 +84,7 @@ class SaloonsProvider with ChangeNotifier {
             {},
             00,
             00,
-            doc.data()['rating'],
+            doc.data()['rating'].toDouble(),
             doc.data()['ratings_count'],
             00,
             [],
@@ -231,7 +231,7 @@ class SaloonsProvider with ChangeNotifier {
     List<dynamic> list = [];
     try {
       return await FirebaseFirestore.instance
-          .collection('saloons/${selectedSaloon.id}/all_reviews')
+          .collection('saloons/${selectedSaloon.id}/all_reviews').orderBy('date',descending: true)
           .get()
           .then((value) {
         value.docs.forEach((e) {
@@ -345,19 +345,7 @@ class SaloonsProvider with ChangeNotifier {
     }
   }
 
-  Future<void> searchByName(String key) async {
-    list=[];
-    print('search by name');
 
-    try {
-      return await FirebaseFirestore.instance
-          .collection('saloons')
-          .where('lower_case', isEqualTo: key)
-          .get();
-    } on PlatformException catch (e) {
-      print(e.message);
-    }
-  }
 
   Future<void> searchByCategory(String key) async {
     print('categori search');
@@ -372,9 +360,11 @@ class SaloonsProvider with ChangeNotifier {
 
 
   List<QueryDocumentSnapshot> list = [];
+  bool isDataReady=false;
 
   Future<void> search(String city, String category, String gender) async {
     list=[];
+    isDataReady=false;
     notifyListeners();
     if (city == "") {
       city = null;
@@ -398,12 +388,36 @@ class SaloonsProvider with ChangeNotifier {
         value.docs.forEach((element) {
           list.add(element);
         });
+        isDataReady=true;
         notifyListeners();
       }
     );
 
     } on PlatformException catch (e) {
     print(e.message);
+    }
+  }
+
+  Future<void> searchByName(String key) async {
+    list=[];
+    isDataReady=false;
+    notifyListeners();
+    print('search by name');
+
+    try {
+      return await FirebaseFirestore.instance
+          .collection('saloons')
+          .where('lower_case', isEqualTo: key)
+          .get().then((value) {
+        value.docs.forEach((element) {
+          list.add(element);
+        });
+        isDataReady=true;
+        notifyListeners();
+      }
+      );
+    } on PlatformException catch (e) {
+      print(e.message);
     }
   }
 

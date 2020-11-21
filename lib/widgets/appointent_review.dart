@@ -14,13 +14,20 @@ class AppointmentReview extends StatefulWidget {
 
 class _AppointmentReviewState extends State<AppointmentReview> {
   final _form = GlobalKey<FormState>();
+  bool loading=false;
 
   Future<bool> saveForm() async {
     final isValid = _form.currentState.validate();
     if (isValid) {
       if(star>0){
+        setState(() {
+          loading=true;
+        });
         Provider.of<AppointmentProvider>(context,listen: false).postReview(context, star, review, widget.appId,widget.saloonId).
         then((value){
+          setState(() {
+            loading=false;
+          });
           Navigator.pop(context,true);
         });
       }
@@ -92,6 +99,8 @@ class _AppointmentReviewState extends State<AppointmentReview> {
             },
           ),
         ),
+        loading ? Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(kMainYellowColor),),)
+            :
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [

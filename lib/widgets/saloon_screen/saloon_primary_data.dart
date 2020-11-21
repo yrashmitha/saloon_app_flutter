@@ -30,19 +30,21 @@ class SaloonPrimaryData extends StatelessWidget {
           height: 10,
         ),
         Container(
-          width: MediaQuery.of(context).size.width * .4,
+          width: MediaQuery.of(context).size.width ,
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Icon(
                 FontAwesomeIcons.solidStar,
                 size: 16,
                 color: Color(0xFFDAA520),
               ),
+              SizedBox(width: 10,),
               Text(
-                "${ratings.toString()} Ratings",
+                "${ratings.toStringAsFixed(3)} Ratings",
                 style: TextStyle(fontWeight: FontWeight.w700),
               ),
+              SizedBox(width: 10,),
               Text("(${ratingsCount.toString()})"),
             ],
           ),

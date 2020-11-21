@@ -82,22 +82,25 @@ class _HomeScreenState extends State<HomeScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
                         child: LayoutBuilder(builder: (ctx, constraints) {
                           return Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
+                              SizedBox(height: 10,),
                               Align(
-                                child: IconButton(
-                                  icon: Icon(Icons.filter_alt_sharp),
+                                child: MaterialButton(
+                                  child: Icon(Icons.filter_list,),
                                   onPressed: () {
-                                    log("ft");
                                     _settingModalBottomSheet(context);
                                   },
+                                  color: Colors.white.withOpacity(.9),
+                                  padding: EdgeInsets.all(16),
+                                  shape: CircleBorder(),
+                                  elevation: 0.5,
+                                  splashColor: kMainYellowColor,
+
                                 ),
+                                alignment: Alignment.centerRight,
                               ),
-                              SizedBox(
-                                height: (constraints.maxHeight -
-                                        appBar.preferredSize.height) *
-                                    0.1,
-                              ),
+                              SizedBox(height: 5,),
                               Text(
                                 "Find your favourite saloon",
                                 style: TextStyle(

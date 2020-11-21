@@ -6,13 +6,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:helawebdesign_saloon/models/app_user.dart';
 import 'package:helawebdesign_saloon/models/appointment.dart';
 import 'package:helawebdesign_saloon/models/service.dart';
 import 'package:helawebdesign_saloon/providers/saloons_provider.dart';
 import 'package:helawebdesign_saloon/providers/user_provider.dart';
-import 'package:provider/provider.dart';
-import 'package:syncfusion_flutter_calendar/calendar.dart';
+
 
 class AppointmentProvider with ChangeNotifier {
   List<Service> _userSelectedServices = [];
@@ -59,28 +57,31 @@ class AppointmentProvider with ChangeNotifier {
         .collection('appointments')
         .orderBy('date_time')
         .where('date_time',
-            isGreaterThanOrEqualTo: DateTime.now().subtract(Duration(days: 1)))
+        isGreaterThanOrEqualTo: DateTime.now().subtract(Duration(days: 1)))
         .where('saloon_id', isEqualTo: saloonId)
         .get()
-        .then((QuerySnapshot querySnapshot) => {
-              querySnapshot.docs.forEach((doc) {
-                appList.add(SaloonAppointment(
-                    doc.id,
-                    doc.data()['saloon_id'],
-                    doc.data()['saloon_name'],
-                    doc.data()['saloon_contact_number'],
-                    doc.data()['user_id'],
-                    doc.data()['user_name'],
-                    doc.data()['user_contact_number'],
-                    doc.data()['status'],
-                    doc.data()['price'],
-                    doc.data()['user_image'],
-                    doc.data()['saloon_image'],
-                    doc.data()['date_time'],
-                    doc.data()['is_reviewed']!=null ? doc.data()['is_reviewed'] : false,
-                    doc.data()['services']));
-              })
-            })
+        .then((QuerySnapshot querySnapshot) =>
+    {
+      querySnapshot.docs.forEach((doc) {
+        appList.add(SaloonAppointment(
+            doc.id,
+            doc.data()['saloon_id'],
+            doc.data()['saloon_name'],
+            doc.data()['saloon_contact_number'],
+            doc.data()['user_id'],
+            doc.data()['user_name'],
+            doc.data()['user_contact_number'],
+            doc.data()['status'],
+            doc.data()['price'],
+            doc.data()['user_image'],
+            doc.data()['saloon_image'],
+            doc.data()['date_time'],
+            doc.data()['is_reviewed'] != null
+                ? doc.data()['is_reviewed']
+                : false,
+            doc.data()['services']));
+      })
+    })
         .catchError((err) {
       print(err);
     });
@@ -90,8 +91,8 @@ class AppointmentProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<SaloonAppointment> addAppointment(
-      SaloonAppointment app, SaloonsProvider saloonsProvider) async {
+  Future<SaloonAppointment> addAppointment(SaloonAppointment app,
+      SaloonsProvider saloonsProvider) async {
     var _id;
     _id = '${app.dateTime.toDate().toString()}@${app.saloonId}';
 
@@ -107,7 +108,7 @@ class AppointmentProvider with ChangeNotifier {
           ? 'Not Provided'
           : user.accountUser.phoneNumber;
 
-       await FirebaseFirestore.instance.collection('appointments').doc(_id).set({
+      await FirebaseFirestore.instance.collection('appointments').doc(_id).set({
         'date_time': app.dateTime,
         'saloon_id': app.saloonId,
         'user_id': app.userId,
@@ -151,21 +152,20 @@ class AppointmentProvider with ChangeNotifier {
   }
 
   Future<bool> getAppointmentsBelongsToUser(bool refresh) async {
-    if(refresh){
+    if (refresh) {
       print('i am running');
       runThisFunction();
       return true;
     }
-    else{
-      if (_userAppointments.length>0) {
+    else {
+      if (_userAppointments.length > 0) {
         return false;
       }
-      else{
+      else {
         runThisFunction();
         return false;
       }
     }
-
   }
 
 
@@ -178,10 +178,11 @@ class AppointmentProvider with ChangeNotifier {
         .orderBy('date_time')
         .where('user_id', isEqualTo: user.uid)
         .get()
-        .then((QuerySnapshot querySnapshot) => {
+        .then((QuerySnapshot querySnapshot) =>
+    {
       querySnapshot.docs.forEach((doc) {
         print(doc.id);
-                appList.add(SaloonAppointment(
+        appList.add(SaloonAppointment(
             doc.id,
             doc.data()['saloon_id'],
             doc.data()['saloon_name'],
@@ -194,7 +195,9 @@ class AppointmentProvider with ChangeNotifier {
             doc.data()['user_image'],
             doc.data()['saloon_image'],
             doc.data()['date_time'],
-            doc.data()['is_reviewed']!=null ? doc.data()['is_reviewed'] : false,
+            doc.data()['is_reviewed'] != null
+                ? doc.data()['is_reviewed']
+                : false,
             doc.data()['services']));
       })
     })
@@ -209,52 +212,146 @@ class AppointmentProvider with ChangeNotifier {
   }
 
 
-
-  Future<bool> cancelAppointment(String id)async{
+  Future<bool> cancelAppointment(String id) async {
     log("hi");
-    try{
-      await FirebaseFirestore.instance.collection('appointments').doc(id).update({'status' : 'CANCELLED'}).then((_){
+    try {
+      await FirebaseFirestore.instance.collection('appointments')
+          .doc(id)
+          .update({'status': 'CANCELLED'})
+          .then((_) {
         return true;
       })
-          .catchError((e){
+          .catchError((e) {
         throw e;
       });
-    } on PlatformException catch(e){
+    } on PlatformException catch (e) {
       throw e;
     }
     return false;
   }
 
+  Future<bool> markAsCompleteAppointment(String id) async {
+    try {
+      var res = await FirebaseFirestore.instance.collection('appointments')
+          .doc(id)
+          .update({'status': 'COMPLETED'})
+          .then((_) {
+        return true;
+      })
+          .catchError((e) {
+        throw e;
+      });
 
-  Future<void> postReview(BuildContext context,int star,String review,String appointmentId,String saloonId)async{
+      if(res){
+        return true;
+      }
+      else {
+        return false;
+      }
+    } on PlatformException catch (e) {
+      throw e;
+    }
 
-    try{
-      var res = await FirebaseFirestore.instance.collection("appointments/").doc(appointmentId).update({
-        'review' :{
-          'user_name' : FirebaseAuth.instance.currentUser.displayName,
-          'user_profile_avatar' : FirebaseAuth.instance.currentUser.photoURL,
-          'date' : Timestamp.now(),
-          'star' : star,
-          'customer_review' : review,
-          'appointment_id' :appointmentId
+  }
+
+
+  Future<void> postReview(BuildContext context, int star, String review,
+      String appointmentId, String saloonId) async {
+
+    final db = FirebaseFirestore.instance;
+
+    var appointmentRef= db.collection("appointments/").doc(appointmentId);
+    var saloonRef = db.collection("saloons").doc(saloonId);
+
+    try {
+
+      var res = await FirebaseFirestore.instance.collection("appointments/")
+          .doc(appointmentId)
+          .update({
+        'review': {
+          'user_name': FirebaseAuth.instance.currentUser.displayName,
+          'user_profile_avatar': FirebaseAuth.instance.currentUser.photoURL,
+          'date': Timestamp.now(),
+          'star': star,
+          'customer_review': review,
+          'appointment_id': appointmentId
         },
-        'is_reviewed' :true
+        'is_reviewed': true
       });
 
       var second = await FirebaseFirestore.instance.collection("saloons/$saloonId/all_reviews")
           .add({
-        'user_name' : FirebaseAuth.instance.currentUser.displayName,
-        'user_profile_avatar' : FirebaseAuth.instance.currentUser.photoURL,
-        'date' : Timestamp.now(),
-        'star' : star,
-        'customer_review' : review,
-        'appointment_id' :appointmentId
+        'user_name': FirebaseAuth.instance.currentUser.displayName,
+        'user_profile_avatar': FirebaseAuth.instance.currentUser.photoURL,
+        'date': Timestamp.now(),
+        'star': star,
+        'customer_review': review,
+        'appointment_id': appointmentId
       });
 
-    } on PlatformException catch(e){
+
+      db.runTransaction((transaction){
+        return transaction.get(saloonRef).then((saloon){
+          var newNumRatings = saloon.data()['ratings_count'] + 1;
+
+          // Compute new average rating
+          var oldRatingTotal = saloon.data()['rating'] * saloon.data()['ratings_count'];
+          var newAvgRating = (oldRatingTotal + star) / newNumRatings;
+
+
+          transaction.update(saloonRef, {
+            "ratings_count": newNumRatings,
+            "rating": newAvgRating
+          });
+        });
+      }).then((value) => print('transaction ok')).catchError((e){
+        print(e);
+          });
+
+    } on PlatformException catch (e) {
       throw e;
     }
+  }
 
+
+  SaloonAppointment dummyAppointment = SaloonAppointment(
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      0,
+      "",
+      "",
+      null,
+      false,
+      []);
+  Future<void> getThisAppointmentDetails(String id) async {
+    log("Appointment getting running");
+
+    var res = await FirebaseFirestore.instance.collection('appointments').doc(id).get().then((doc) {
+      dummyAppointment.appointmentId = doc.id;
+      dummyAppointment.saloonId = doc.data()['saloon_id'];
+      dummyAppointment.saloonName = doc.data()['saloon_name'];
+      dummyAppointment.saloonContactNumber = doc.data()['saloon_contact_number'];
+      dummyAppointment.userId = doc.data()['user_id'];
+      dummyAppointment.userName = doc.data()['user_name'];
+      dummyAppointment.userContactNumber = doc.data()['user_contact_number'];
+      dummyAppointment.status = doc.data()['status'];
+      dummyAppointment.price = doc.data()['price'];
+      dummyAppointment.userImage = doc.data()['user_image'];
+      dummyAppointment.saloonImage = doc.data()['saloon_image'];
+      dummyAppointment.dateTime = doc.data()['date_time'];
+      dummyAppointment.isReviewed = doc.data()['is_reviewed'] != null ? doc.data()['is_reviewed'] : false;
+      dummyAppointment.bookedServices = doc.data()['services'];
+
+      notifyListeners();
+    }).catchError((err) {
+    print(err);
+    });
   }
 
 }
