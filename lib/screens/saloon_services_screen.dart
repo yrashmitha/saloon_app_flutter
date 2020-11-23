@@ -1,3 +1,6 @@
+import 'dart:developer';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -6,6 +9,8 @@ import 'package:helawebdesign_saloon/models/service.dart';
 import 'package:helawebdesign_saloon/providers/appointment_provider.dart';
 import 'package:helawebdesign_saloon/providers/saloons_provider.dart';
 import 'package:helawebdesign_saloon/screens/appointment_book.dart';
+import 'package:paginate_firestore/bloc/pagination_listeners.dart';
+import 'package:paginate_firestore/paginate_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:route_transitions/route_transitions.dart';
 
@@ -19,6 +24,8 @@ class SaloonServicesScreen extends StatefulWidget {
 class _SaloonServicesScreenState extends State<SaloonServicesScreen> {
   AppointmentProvider appointmentProvider;
   double finalPrice = 0;
+
+  PaginateRefreshedChangeListener refreshChangeListener = PaginateRefreshedChangeListener();
 
   var loading = false;
 
@@ -64,26 +71,39 @@ class _SaloonServicesScreenState extends State<SaloonServicesScreen> {
     return map;
   }
 
+
+
+
+
+  Map<Service,bool> serviceMap={};
+
+  void createObjectAndInsertToMap(DocumentSnapshot snapshot){
+    Service s = Service(id:snapshot.id,name: snapshot.data()['name'],description: snapshot.data()['description'],price: snapshot.data()['price']);
+    serviceMap.addAll({s:false});
+  }
+
+
+
+
+
   @override
   void initState() {
-    loading = true;
 
     super.initState();
     Future.delayed(Duration.zero).then((_) {
       final saloonProvider =
       Provider.of<SaloonsProvider>(context, listen: false);
       final saloonId = saloonProvider.selectedSaloon.id;
-      saloonProvider.getAllServicesFromThisSaloon(saloonId).then((value) {
-        setState(() {
-          _serviceList = createServiceMap(saloonProvider.getAllService);
-          selectedServices =
-              Provider
-                  .of<AppointmentProvider>(context, listen: false)
-                  .getUserSelectedService;
-          filterServices(selectedServices, _serviceList);
-          loading = false;
-        });
+      setState(() {
+        _serviceList=createServiceMap(saloonProvider.selectedSaloon.services);
       });
+      // saloonProvider.getAllServicesFromThisSaloon(saloonId).then((value) {
+      //   setState(() {
+      //     _serviceList = createServiceMap(saloonProvider.getAllService);
+      //     filterServices(selectedServices, _serviceList);
+      //     loading = false;
+      //   });
+      // });
     });
   }
 
@@ -91,6 +111,8 @@ class _SaloonServicesScreenState extends State<SaloonServicesScreen> {
   Widget build(BuildContext context) {
     final globalKey = GlobalKey<ScaffoldState>();
     appointmentProvider = Provider.of<AppointmentProvider>(context);
+    final saloonProvider= Provider.of<SaloonsProvider>(context);
+    final saloonId= saloonProvider.selectedSaloon.id;
     return WillPopScope(
       onWillPop: () async {
         appointmentProvider.clearServices();
@@ -106,50 +128,52 @@ class _SaloonServicesScreenState extends State<SaloonServicesScreen> {
             ? Center(child: CircularProgressIndicator())
             : Padding(
           padding: const EdgeInsets.all(12.0),
-          child: Container(
-            child: SingleChildScrollView(
+          child: SingleChildScrollView(
+            child: Container(
               child: Column(
-                children: _serviceList.keys.map((Service key) {
-                  return Column(children: [
-                    new CheckboxListTile(
-                      secondary: Icon(
-                        FontAwesomeIcons.cut,
-                        color: kDeepBlue,
+                children: _serviceList.keys.map((Service key){
+                  return Column(
+                    children: [
+                      CheckboxListTile(
+                        secondary: Icon(
+                          FontAwesomeIcons.cut,
+                          color: kDeepBlue,
+                        ),
+                        subtitle: Text(key.name),
+                        contentPadding: EdgeInsets.symmetric(horizontal: 0),
+                        title: new Text(key.name),
+                        value: _serviceList[key],
+                        onChanged: (bool value) {
+                          selectedServicesFunc(key);
+                          setState(() {
+                            _serviceList[key] = value;
+                            finalPrice = finalPrice +
+                                (value == true ? key.price : (-key.price));
+                          });
+                        },
                       ),
-                      subtitle: Text(key.description),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 0),
-                      title: new Text(key.name),
-                      value: _serviceList[key],
-                      onChanged: (bool value) {
-                        selectedServicesFunc(key);
-                        setState(() {
-                          _serviceList[key] = value;
-                          finalPrice = finalPrice +
-                              (value == true ? key.price : (-key.price));
-                        });
-                      },
-                    ),
-                    Align(
-                        alignment: Alignment.centerRight,
-                        child: Text(
-                          "Rs. ${key.price.toStringAsFixed(2)}",
-                          style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              color: kDeepBlue),
-                        )),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Divider(
-                      height: 1.5,
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                  ]);
+                      Align(
+                          alignment: Alignment.centerRight,
+                          child: Text(
+                            "Rs. ${key.price.toStringAsFixed(2)}",
+                            style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                color: kDeepBlue),
+                          )),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Divider(
+                        height: 1.5,
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                    ],
+                  );
                 }).toList(),
-              ),
+              )
             ),
           ),
         ),
@@ -231,6 +255,24 @@ class _SaloonServicesScreenState extends State<SaloonServicesScreen> {
       ),
     );
   }
-
-
 }
+
+
+// CheckboxListTile(
+// secondary: Icon(
+// FontAwesomeIcons.cut,
+// color: kDeepBlue,
+// ),
+// subtitle: Text(snapshot.data()['name']),
+// contentPadding: EdgeInsets.symmetric(horizontal: 0),
+// title: new Text(key.name),
+// value: _serviceList[key],
+// onChanged: (bool value) {
+// selectedServicesFunc(key);
+// setState(() {
+// _serviceList[key] = value;
+// finalPrice = finalPrice +
+// (value == true ? key.price : (-key.price));
+// });
+// },
+// ),

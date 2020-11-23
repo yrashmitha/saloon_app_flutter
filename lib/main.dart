@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:helawebdesign_saloon/models/constants.dart';
 import 'package:helawebdesign_saloon/providers/appointment_provider.dart';
 import 'package:helawebdesign_saloon/providers/auth_provider.dart';
+import 'package:helawebdesign_saloon/providers/drawer_provider.dart';
 import 'package:helawebdesign_saloon/providers/navigation_provider.dart';
 import 'package:helawebdesign_saloon/providers/saloons_provider.dart';
 import 'package:helawebdesign_saloon/providers/user_provider.dart';
@@ -43,7 +44,8 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (ctx) => AppointmentProvider(),
         ),
-        ChangeNotifierProvider(create: (ctx) => NavigationProvider())
+        ChangeNotifierProvider(create: (ctx) => NavigationProvider()),
+        ChangeNotifierProvider(create: (ctx) => DrawerProvider())
       ],
       child: Consumer<AuthProvider>(
         builder: (ctx,auth,_){

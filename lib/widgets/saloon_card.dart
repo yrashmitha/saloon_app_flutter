@@ -63,7 +63,7 @@ class SaloonCard extends StatelessWidget {
                             fit: BoxFit.cover,
                             placeholder: (ctx, url) {
                               return Center(
-                                child: CircularProgressIndicator(),
+                                child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(kMainYellowColor),),
                               );
                             },
                             width: MediaQuery.of(context).size.width,

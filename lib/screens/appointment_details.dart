@@ -14,9 +14,9 @@ import 'package:provider/provider.dart';
 
 class AppointmentDetailsScreen extends StatefulWidget {
   final bool fromBookingPage;
-  final SaloonAppointment appointment;
+  final String appointmentId;
 
-  AppointmentDetailsScreen({this.fromBookingPage = false, this.appointment});
+  AppointmentDetailsScreen({this.fromBookingPage = false, this.appointmentId});
 
   static String id = "appointment-details-screen";
 
@@ -41,7 +41,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
         loading = true;
       });
       Provider.of<AppointmentProvider>(context, listen: false)
-          .getThisAppointmentDetails(widget.appointment.appointmentId)
+          .getThisAppointmentDetails(widget.appointmentId)
           .then((value) {
         setState(() {
           loading = false;
@@ -223,9 +223,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                                                       onPressed: () {
                                                         provider
                                                             .cancelAppointment(
-                                                                widget
-                                                                    .appointment
-                                                                    .appointmentId)
+                                                                widget.appointmentId)
                                                             .then((_) {
                                                           setState(() {
                                                             isCancelled = true;
@@ -335,11 +333,13 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
           color: kDeepBlue.withOpacity(.2),
           height: MediaQuery.of(context).size.height * .09,
           child: Center(
-              child: Text(
-            "Rs. ${widget.appointment.price.toInt().toStringAsFixed(2)}",
+              child: app.appointmentId!=""?Text(
+            "Rs. ${app.price.toInt().toStringAsFixed(2)}",
             style: const TextStyle(
                 color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-          ))),
+          ) : Text("")
+          )
+      ),
     );
   }
 }

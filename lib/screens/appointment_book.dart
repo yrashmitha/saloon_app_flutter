@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:helawebdesign_saloon/models/appointment.dart';
 import 'package:helawebdesign_saloon/models/constants.dart';
@@ -38,6 +39,7 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
 
   @override
   void initState() {
+
     setState(() {
       loading = true;
     });
@@ -136,9 +138,13 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
                       false,
                       serviceList);
 
+                  final fbm = FirebaseMessaging();
+                  final token = await fbm.getToken();
 
 
-                   await provider.addAppointment(app, saloonProvider).then((value) {
+
+
+                   await provider.addAppointment(app, saloonProvider,token).then((value) {
                      setState(() {
                        loading=false;
                      });
@@ -203,7 +209,7 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
         builder: (ctx) {
           return AppointmentDetailsScreen(
             fromBookingPage: true,
-            appointment: app,
+            appointmentId: app.appointmentId,
           );
         },
       ),

@@ -67,7 +67,7 @@ class SaloonsProvider with ChangeNotifier {
     try {
       var r = await FirebaseFirestore.instance
           .collection('saloons')
-          .orderBy('rating', descending: true)
+          .orderBy('rating', descending: true).limit(5)
           .get()
           .then((QuerySnapshot querySnapshot) async {
         print("getting saloon finished");
@@ -180,16 +180,63 @@ class SaloonsProvider with ChangeNotifier {
     }
   }
 
+  bool hasMore = true;
+  DocumentSnapshot lastServicesSnapshot;
+
+  Future<void> getMoreServices(String saloonId) async {
+    List<Service> sList = [];
+    if(hasMore){
+      try {
+        await FirebaseFirestore.instance
+            .collection('saloons/$saloonId/all_services').
+        orderBy('name',descending: true).startAfterDocument(lastServicesSnapshot).
+        limit(5)
+            .get()
+            .then((QuerySnapshot querySnapshot) =>
+        {
+        if (querySnapshot.docs.length < 5) {
+            hasMore = false,
+            },
+            lastServicesSnapshot= querySnapshot.docs[querySnapshot.size-1],
+          querySnapshot.docs.forEach((doc) {
+            sList.add(Service(
+                id: doc.id,
+                name: doc['name'],
+                description: doc['description'],
+                price: doc['price']));
+          })
+        })
+            .catchError((onError) {
+          print(onError);
+        });
+        allServices.addAll(sList);
+
+        notifyListeners();
+      } on PlatformException catch (e) {
+        print(e.code);
+      }
+    }
+
+    else{
+      print('no services');
+    }
+
+
+  }
+
+
   Future<void> getAllServicesFromThisSaloon(String saloonId) async {
-    print('saloon proviedr get all services runing');
     List<Service> sList = [];
     await Firebase.initializeApp();
     try {
       await FirebaseFirestore.instance
-          .collection('saloons/$saloonId/all_services')
+          .collection('saloons/$saloonId/all_services').
+          orderBy('name',descending: true).
+      limit(5)
           .get()
           .then((QuerySnapshot querySnapshot) =>
       {
+        lastServicesSnapshot= querySnapshot.docs[querySnapshot.size-1],
         querySnapshot.docs.forEach((doc) {
           sList.add(Service(
               id: doc.id,
@@ -202,6 +249,7 @@ class SaloonsProvider with ChangeNotifier {
         print(onError);
       });
       allServices = sList;
+
       notifyListeners();
     } on PlatformException catch (e) {
       print(e.code);
@@ -362,40 +410,49 @@ class SaloonsProvider with ChangeNotifier {
   List<QueryDocumentSnapshot> list = [];
   bool isDataReady=false;
 
-  Future<void> search(String city, String category, String gender) async {
-    list=[];
-    isDataReady=false;
-    notifyListeners();
-    if (city == "") {
-      city = null;
-    }
-    if (category == "") {
-      category = null;
-    }
-    if (gender == "") {
-      gender = null;
-    }
+  // Future<void> search(String city, String category, String gender) async {
+  //   list=[];
+  //   isDataReady=false;
+  //   notifyListeners();
+  //   if (city == "") {
+  //     city = null;
+  //   }
+  //   if (category == "") {
+  //     category = null;
+  //   }
+  //   if (gender == "") {
+  //     gender = null;
+  //   }
+  //
+  //   try {
+  //     log("data getting search");
+  //     return await FirebaseFirestore.instance
+  //         .collection('saloons')
+  //         .where('base_location', isEqualTo: city).
+  //     where('gender', isEqualTo: gender).
+  //     where(
+  //         'categories', arrayContainsAny: category == null ? null : [category]).
+  //     get().then((value) {
+  //       value.docs.forEach((element) {
+  //         list.add(element);
+  //       });
+  //       isDataReady=true;
+  //       notifyListeners();
+  //     }
+  //   );
+  //
+  //   } on PlatformException catch (e) {
+  //   print(e.message);
+  //   }
+  // }
 
-    try {
-      log("data getting search");
-      return await FirebaseFirestore.instance
-          .collection('saloons')
-          .where('base_location', isEqualTo: city).
-      where('gender', isEqualTo: gender).
-      where(
-          'categories', arrayContainsAny: category == null ? null : [category]).
-      get().then((value) {
-        value.docs.forEach((element) {
-          list.add(element);
-        });
-        isDataReady=true;
-        notifyListeners();
-      }
-    );
-
-    } on PlatformException catch (e) {
-    print(e.message);
-    }
+  Query searchQuery(String city, String category, String gender){
+    return FirebaseFirestore.instance
+        .collection('saloons')
+        .where('base_location', isEqualTo: city).
+    where('gender', isEqualTo: gender).
+    where(
+        'categories', arrayContainsAny: category == null ? null : [category]);
   }
 
   Future<void> searchByName(String key) async {
@@ -424,7 +481,7 @@ class SaloonsProvider with ChangeNotifier {
   Future<void> addSaloon() async {
     await FirebaseFirestore.instance.collection('saloons').add({
       'base_location': 'Colombo',
-      "name": "Nipuni Fashion",
+      "name": "Nipuni Fashion test",
       'address': 'No 120 Kottawa Rd Samanpura Piliyandala',
       "gender": "FEMALE",
       "main-image_url":

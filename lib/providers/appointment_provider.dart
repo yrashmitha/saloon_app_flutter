@@ -92,7 +92,7 @@ class AppointmentProvider with ChangeNotifier {
   }
 
   Future<SaloonAppointment> addAppointment(SaloonAppointment app,
-      SaloonsProvider saloonsProvider) async {
+      SaloonsProvider saloonsProvider,String token) async {
     var _id;
     _id = '${app.dateTime.toDate().toString()}@${app.saloonId}';
 
@@ -122,6 +122,7 @@ class AppointmentProvider with ChangeNotifier {
         'user_email': user.accountUser.email,
         'user_name': user.accountUser.name,
         'saloon_name': saloonsProvider.selectedSaloon.name,
+        "user_token" : token,
       });
 
       SaloonAppointment s = SaloonAppointment(

@@ -2,6 +2,9 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:helawebdesign_saloon/models/constants.dart';
+import 'package:helawebdesign_saloon/providers/drawer_provider.dart';
+import 'package:helawebdesign_saloon/screens/results_screen.dart';
+import 'package:provider/provider.dart';
 
 class MyDrawer extends StatefulWidget {
 
@@ -32,6 +35,7 @@ class _MyDrawerState extends State<MyDrawer> {
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<DrawerProvider>(context,listen: false);
     return Container(
       width: MediaQuery.of(context).size.width * 0.8,
       child: ListView(
@@ -171,8 +175,16 @@ class _MyDrawerState extends State<MyDrawer> {
                   ),
 
                   Center(child: RaisedButton(onPressed: (){
-                    Navigator.pop(context);
-                    widget.func(_gender,_category,_location);
+                    Provider.of<DrawerProvider>(context,listen: false).clearDefaults();
+                    Provider.of<DrawerProvider>(context,listen: false).category=_category;
+                    Provider.of<DrawerProvider>(context,listen: false).gender=_gender;
+                    Provider.of<DrawerProvider>(context,listen: false).location=_location;
+                    for(var i=0;i<2;i++){
+                      Navigator.pop(context);
+                    }
+                    Navigator.push(context, MaterialPageRoute(builder: (ctx){return ResultsScreen(searchKey: "Custom search",);}));
+
+                   widget.func(_gender,_category,_location);
                   },child: Text("Filter"),color:kMainYellowColor,))
 
                 ],

@@ -31,3 +31,54 @@ exports.addReview = functions.firestore
 
 
 
+exports.appointmentCloudMessage = functions.firestore
+.document('appointments/{id}')
+.onUpdate((change, context) =>{
+    const newValue = change.after.data();
+    const previousValue = change.before.data();
+    const name = newValue.name;
+    const id = context.params.id;
+    const status = newValue.status;
+    const saloonName = newValue['saloon_name'];
+
+
+    var notificationTitle = "";
+    var notificationToken="";
+    const userToken = newValue['user_token'];
+
+
+
+    if(status=="CANCELLED"){
+        notificationTitle = "Your appointment was cancelled by the user";
+
+    }
+    else if(status=="DECLINED"){
+            notificationTitle = "Your appointment was cancelled by the saloon";
+            notificationToken = newValue['user_token'];
+
+    }
+    else if(status=="ACCEPTED"){
+             notificationTitle = "Your appointment was Accepted by the "+saloonName+".";
+             notificationToken = newValue['user_token'];
+    }
+    else if(status=="COMPLETED"){
+                 notificationTitle = "Your appointment was Completed";
+                 notificationToken = newValue['user_token'];
+        }
+
+         const payload = {
+                notification: {
+                    title: ""+notificationTitle+"",
+                    body: 'Tap here to check it out!',
+                    clickAction : 'FLUTTER_NOTIFICATION_CLICK',
+                },
+                data: {
+                    appointment_id : id
+                }
+            }
+
+     admin.messaging().sendToDevice(notificationToken,payload);
+
+    });
+
+

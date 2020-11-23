@@ -151,8 +151,8 @@ class _MyAppointmentsScreenState extends State<MyAppointmentsScreen> {
                                                       AnimationType.slide_right,
                                                   builder: (ctx) {
                                                     return AppointmentDetailsScreen(
-                                                      appointment:
-                                                          appointments[index],
+                                                      appointmentId:
+                                                          appointments[index].appointmentId,
                                                       fromBookingPage: false,
                                                     );
                                                   }));

@@ -1,13 +1,16 @@
 import 'dart:developer';
 
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 import 'package:helawebdesign_saloon/models/constants.dart';
+import 'package:helawebdesign_saloon/providers/drawer_provider.dart';
 import 'package:helawebdesign_saloon/providers/navigation_provider.dart';
 import 'package:helawebdesign_saloon/providers/saloons_provider.dart';
+import 'package:helawebdesign_saloon/screens/appointment_details.dart';
 import 'package:helawebdesign_saloon/screens/results_screen.dart';
 import 'package:helawebdesign_saloon/widgets/category_list.dart';
 import 'package:helawebdesign_saloon/widgets/saloon_card.dart';
@@ -26,14 +29,70 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _page = 0;
   final GlobalKey _bottomNavigationKey = GlobalKey();
+  bool loading = false;
+
+  void navigateLogic(Map msg) {
+    if (msg.containsKey("data")) {
+      if (msg['data'].appointment_id != null) {
+        Navigator.push(
+            context,
+            PageRouteTransition(
+                builder: (ctx) {
+                  return AppointmentDetailsScreen(
+                    appointmentId: msg['data']["appointment_id"],
+                    fromBookingPage: false,
+                  );
+                },
+                animationType: AnimationType.scale));
+      }
+    }
+  }
 
   @override
   void initState() {
     print('home init');
+    final fbm = FirebaseMessaging();
+    fbm.configure(
+        onMessage: (msg) {
+      print("this is calll from onmessage $msg");
+      return;
+    },
+        onResume: (msg) {
+      print("this is calll from on resume $msg");
+      return Navigator.push(
+          context,
+          PageRouteTransition(
+              builder: (ctx) {
+                return AppointmentDetailsScreen(
+                  appointmentId: msg['data']["appointment_id"],
+                  fromBookingPage: false,
+                );
+              },
+              animationType: AnimationType.scale));
+    }, onLaunch: (msg) {
+      print("this is calll from on launch $msg");
+      return Navigator.push(
+          context,
+          PageRouteTransition(
+              builder: (ctx) {
+                return AppointmentDetailsScreen(
+                  appointmentId: msg['data']["appointment_id"],
+                  fromBookingPage: false,
+                );
+              },
+              animationType: AnimationType.scale));
+    });
+    setState(() {
+      loading = true;
+    });
     Future.delayed(Duration.zero).then((value) {
       Provider.of<SaloonsProvider>(context, listen: false)
           .getSaloonsData(false)
-          .then((value) {});
+          .then((value) {
+        setState(() {
+          loading = false;
+        });
+      });
     });
     super.initState();
   }
@@ -84,10 +143,14 @@ class _HomeScreenState extends State<HomeScreen> {
                           return Column(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              SizedBox(height: 10,),
+                              SizedBox(
+                                height: 10,
+                              ),
                               Align(
                                 child: MaterialButton(
-                                  child: Icon(Icons.filter_list,),
+                                  child: Icon(
+                                    Icons.filter_list,
+                                  ),
                                   onPressed: () {
                                     _settingModalBottomSheet(context);
                                   },
@@ -96,11 +159,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                   shape: CircleBorder(),
                                   elevation: 0.5,
                                   splashColor: kMainYellowColor,
-
                                 ),
                                 alignment: Alignment.centerRight,
                               ),
-                              SizedBox(height: 5,),
+                              SizedBox(
+                                height: 5,
+                              ),
                               Text(
                                 "Find your favourite saloon",
                                 style: TextStyle(
@@ -132,11 +196,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 TextBaseline.alphabetic)),
                                     textAlign: TextAlign.start,
                                     onSubmitted: (value) {
-                                      Provider.of<SaloonsProvider>(context,listen: false).searchByName(value);
+                                      //Provider.of<SaloonsProvider>(context,listen: false).searchByName(value);
                                       Navigator.push(context,
                                           MaterialPageRoute(builder: (ctx) {
                                         return ResultsScreen(
                                           searchKey: value,
+                                          isThisName: true,
                                         );
                                       }));
                                     },
@@ -151,12 +216,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: Center(
-                    child: Text(
-                      "Top Categories",
-                      style: kTitleStyle,
-                    ),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 8.0, horizontal: 10),
+                  child: Text(
+                    "Top Categories",
+                    style: kSaloonName,
                   ),
                 ),
                 CategoryList(),
@@ -169,25 +233,33 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 Container(
                   height: 250,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemBuilder: (ctx, index) {
-                      return SaloonCard(
-                        saloon: saloons[index],
-                      );
-                    },
-                    itemCount: saloons.length,
-                  ),
+                  child: loading
+                      ? Center(
+                          child: CircularProgressIndicator(
+                            valueColor:
+                                AlwaysStoppedAnimation(kMainYellowColor),
+                          ),
+                        )
+                      : ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemBuilder: (ctx, index) {
+                            return SaloonCard(
+                              saloon: saloons[index],
+                            );
+                          },
+                          itemCount: loading ? 5 : saloons.length,
+                        ),
                 ),
-                RaisedButton(
-                  child: Text("Add a saloon"),
-                  onPressed: () {
-                    data.addReview().then((value) {
-                      Scaffold.of(context).showSnackBar(
-                          SnackBar(content: Text("review Added")));
-                    });
-                  },
-                )
+                // RaisedButton(
+                //   child: Text("Add a saloon"),
+                //   onPressed: () {
+                //     Provider.of<NavigationProvider>(context,listen: false).changePage(1);
+                //     // data.addSaloon().then((value) {
+                //     //   Scaffold.of(context).showSnackBar(
+                //     //       SnackBar(content: Text("saloon Added")));
+                //     // });
+                //   },
+                // )
               ],
             ),
           ]),
@@ -208,41 +280,53 @@ void _settingModalBottomSheet(context) {
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                Text(
-                  "Select your City",
-                  style: kSaloonName,
-                ),
-                Container(
-                  height: MediaQuery.of(context).size.height * .4,
-                  child: ListView.builder(
-                    itemBuilder: (ctx, index) {
-                      return GestureDetector(
-                        onTap: () {
-                          Provider.of<SaloonsProvider>(context,listen: false).search(kCityList[index], '', '');
-                          Navigator.pop(ctx);
-                          Navigator.push(context,
-                              PageRouteTransition(builder: (ctx) {
-                            return ResultsScreen(searchKey: kCityList[index],city:  kCityList[index],);
-                          }));
-                        },
-                        child: Column(
-                          children: [
-                            ListTile(
-                              title: Text(kCityList[index]),
-                              trailing: Icon(Icons.arrow_forward_sharp),
-                              contentPadding: EdgeInsets.all(0),
+                    Text(
+                      "Select your City",
+                      style: kSaloonName,
+                    ),
+                    Container(
+                      height: MediaQuery.of(context).size.height * .4,
+                      child: ListView.builder(
+                        itemBuilder: (ctx, index) {
+                          return GestureDetector(
+                            onTap: () {
+                              Provider.of<DrawerProvider>(context,
+                                      listen: false)
+                                  .clearDefaults();
+                              Provider.of<DrawerProvider>(context,
+                                      listen: false)
+                                  .location = kCityList[index];
+                              print(Provider.of<DrawerProvider>(context,
+                                      listen: false)
+                                  .location);
+                              //Provider.of<SaloonsProvider>(context,listen: false).search(kCityList[index], '', '');
+                              Navigator.pop(ctx);
+                              Navigator.push(context,
+                                  PageRouteTransition(builder: (ctx) {
+                                return ResultsScreen(
+                                  searchKey: kCityList[index],
+                                  city: kCityList[index],
+                                );
+                              }));
+                            },
+                            child: Column(
+                              children: [
+                                ListTile(
+                                  title: Text(kCityList[index]),
+                                  trailing: Icon(Icons.arrow_forward_sharp),
+                                  contentPadding: EdgeInsets.all(0),
+                                ),
+                                Divider()
+                              ],
                             ),
-                            Divider()
-                          ],
-                        ),
-                      );
-                    },
-                    itemCount: kCityList.length,
-                  ),
-                )
-              ]),
+                          );
+                        },
+                        itemCount: kCityList.length,
+                      ),
+                    )
+                  ]),
             ),
           ),
         );

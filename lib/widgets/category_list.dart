@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:helawebdesign_saloon/models/category.dart';
+import 'package:helawebdesign_saloon/providers/drawer_provider.dart';
 import 'package:helawebdesign_saloon/providers/saloons_provider.dart';
 import 'package:helawebdesign_saloon/screens/results_screen.dart';
 import 'package:provider/provider.dart';
@@ -22,7 +23,9 @@ class CategoryList extends StatelessWidget {
             var category = catList[index];
             return GestureDetector(
               onTap: () {
-                Provider.of<SaloonsProvider>(context,listen: false).search("", category.key, "");
+                //Provider.of<SaloonsProvider>(context,listen: false).search("", category.key, "");
+                Provider.of<DrawerProvider>(context,listen: false).clearDefaults();
+                Provider.of<DrawerProvider>(context,listen: false).category=category.key;
                 print(category.key);
                 Navigator.push(
                   context,
