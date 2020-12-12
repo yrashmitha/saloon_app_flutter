@@ -84,6 +84,7 @@ class SaloonsProvider with ChangeNotifier {
             {},
             00,
             00,
+            [],
             doc.data()['rating'].toDouble(),
             doc.data()['ratings_count'],
             00,
@@ -130,6 +131,7 @@ class SaloonsProvider with ChangeNotifier {
             {},
             00,
             00,
+            [],
             doc.data()['rating'],
             doc.data()['ratings_count'],
             00,
@@ -157,6 +159,7 @@ class SaloonsProvider with ChangeNotifier {
         _selectedSaloon.description = doc.data()['description'];
         _selectedSaloon.additionalData = doc.data()["additional_data"];
         _selectedSaloon.contactNumber = doc.data()['contact_number'].toString();
+        _selectedSaloon.closedDays = doc.data()['closed_days'];
         _selectedSaloon.openTime = doc.data()['open_time'];
         _selectedSaloon.closeTime = doc.data()['close_time'];
         _selectedSaloon.appointmentInterval =

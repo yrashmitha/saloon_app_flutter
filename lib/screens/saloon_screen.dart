@@ -141,7 +141,7 @@ class _SaloonScreenState extends State<SaloonScreen>
                       );
                     },
                     width: MediaQuery.of(context).size.width,
-                    imageUrl: widget.saloon.featuredImageUrl,
+                    imageUrl: widget.saloon.featuredImageUrl['url'],
                   ),
                 ),
               ),

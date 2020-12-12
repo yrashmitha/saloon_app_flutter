@@ -133,7 +133,7 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
                       'PENDING',
                       widget.price.toInt(),
                       user.photoURL,
-                      _saloonsProvider.selectedSaloon.featuredImageUrl,
+                      _saloonsProvider.selectedSaloon.featuredImageUrl['url'],
                       Timestamp.fromDate(details.date),
                       false,
                       serviceList);
@@ -265,10 +265,8 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
                                 timeFormat: 'hh:mm',
                                 startHour: selectedSaloon.openTime.toDouble(),
                                 endHour: selectedSaloon.closeTime.toDouble(),
-                                nonWorkingDays: <int>[
-                                  DateTime.sunday,
-                                  DateTime.saturday
-                                ]),
+                                nonWorkingDays: selectedSaloon.closedDays.cast<int>(),
+                            ),
                           ),
                         ),
                         // SizedBox(

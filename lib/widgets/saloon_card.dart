@@ -22,6 +22,7 @@ class SaloonCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return Container(
       height: MediaQuery.of(context).size.height * .33,
       width: MediaQuery.of(context).size.width * 0.8,
@@ -67,7 +68,7 @@ class SaloonCard extends StatelessWidget {
                               );
                             },
                             width: MediaQuery.of(context).size.width,
-                            imageUrl: saloon.featuredImageUrl,
+                            imageUrl: saloon.featuredImageUrl['url'],
                           ),
                         ),
                       ),

@@ -22,7 +22,7 @@ class SaloonImageSlider extends StatelessWidget {
                 onTap: () {
                   Navigator.push(context,  PageRouteTransition(
                       builder: (context){
-                        return GalleryImage(url: imageList[index],);
+                        return GalleryImage(url: imageList[index]['url'],);
                       },
                       fullscreenDialog: true,
                       animationType: AnimationType.slide_up
@@ -40,7 +40,7 @@ class SaloonImageSlider extends StatelessWidget {
                         ),
                       );
                     },
-                    imageUrl: imageList[index],
+                    imageUrl: imageList[index]['url'],
                   ),
                 ),
               );

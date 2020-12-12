@@ -2,7 +2,7 @@
 class Saloon{
   String id;
   String name;
-  String featuredImageUrl;
+  Map<dynamic,dynamic> featuredImageUrl;
   String description;
   String baseLocation;
   String address;
@@ -12,6 +12,7 @@ class Saloon{
   Map additionalData;
   int openTime;
   int closeTime;
+  List<dynamic> closedDays;
   double rating;
   int ratingsCount;
   List<dynamic> services;
@@ -21,5 +22,5 @@ class Saloon{
 
   Saloon(this.id, this.name, this.featuredImageUrl, this.description,
       this.baseLocation, this.address, this.gender,this.contactNumber, this.additionalData,this.openTime,this.closeTime,
-      this.rating,this.ratingsCount,this.appointmentInterval, this.services,this.smallGallery,this.reviews);
+      this.closedDays,this.rating,this.ratingsCount,this.appointmentInterval, this.services,this.smallGallery,this.reviews);
 }
