@@ -56,8 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onMessage: (msg) {
       print("this is calll from onmessage $msg");
       return;
-    },
-        onResume: (msg) {
+    }, onResume: (msg) {
       print("this is calll from on resume $msg");
       return Navigator.push(
           context,
